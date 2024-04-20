@@ -8,7 +8,7 @@ import bcrypt
 
 class TestStudent(unittest.TestCase):
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         cls.data = {
             'first_name': 'test_1',
             'middle_name': 'test_1',

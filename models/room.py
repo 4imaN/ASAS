@@ -5,7 +5,6 @@ from models.basemodel import BaseModel
 from models import db
 from sqlalchemy import (
                         String,
-                        Integer,
                        )
 from sqlalchemy.orm import (
                             Mapped,
@@ -15,5 +14,5 @@ from sqlalchemy.orm import (
 
 class Room(BaseModel, db.Model):
     __tablename__ = 'rooms'
-    block_no: Mapped[int] = mapped_column(Integer, nullable=False)
-    room_no: Mapped[str] = mapped_column(String(60), nullable=False)
+    block_no: Mapped[str] = mapped_column(String(10), nullable=False)
+    room_no: Mapped[str] = mapped_column(String(10), nullable=False)

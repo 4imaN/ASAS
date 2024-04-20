@@ -20,8 +20,9 @@ from sqlalchemy.orm import (
 
 class Course(BaseModel, db.Model):
     __tablename__ = 'courses'
-    course_code: Mapped[str] = mapped_column(String(60), nullable=False)
+    course_code: Mapped[str] = mapped_column(String(60), unique=True)
     course_name: Mapped[str] = mapped_column(String(60), nullable=False)
     course_credit: Mapped[str] = mapped_column(String(60), nullable=False)
     course_category: Mapped[str] = mapped_column(String(60), default='Common', nullable=False)
     assigned_students: Mapped[List['AssignedStudent']] = relationship('AssignedStudent', back_populates='course', cascade='all')
+    # course_outline path

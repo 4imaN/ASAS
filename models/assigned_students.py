@@ -21,4 +21,5 @@ class AssignedStudent(BaseModel, db.Model):
     instructor_id: Mapped[str] = mapped_column(String(60), ForeignKey('instructors.id'), nullable=False)
     course_id: Mapped[str] = mapped_column(String(60), ForeignKey('courses.id'), nullable=False)
     student = relationship('Student', back_populates='assigned_students')
-    # instructors = relationship('Instructor', back_populates='assigned_students')
+    instructor = relationship('Instructor', back_populates='assigned_students')
+    course = relationship('Course', back_populates='assigned_students')
