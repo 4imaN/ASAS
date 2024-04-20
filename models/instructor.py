@@ -24,4 +24,4 @@ class Instructor(BaseModel, db.Model):
     finger_id: Mapped[str] = mapped_column(String(60))
     rf_id: Mapped[str] = mapped_column(String(60))
     qualification: Mapped[str] = mapped_column(String(60), nullable=False)
-    students: Mapped[List['AssignedStudent']] = relationship(back_populates='instructor')
+    assigned_students: Mapped[List['AssignedStudent']] = relationship('AssignedStudent', back_populates='instructor')

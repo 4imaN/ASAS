@@ -12,7 +12,8 @@ from sqlalchemy import (
                        )
 from sqlalchemy.orm import (
                             Mapped,
-                            mapped_column
+                            mapped_column,
+                            relationship
                             )
 
 
@@ -22,3 +23,4 @@ class InstAttendance(BaseModel, db.Model):
     room_id: Mapped[str] = mapped_column(String(60), ForeignKey('rooms.id'), nullable=False)
     start_time: Mapped[DateTime] = mapped_column(DateTime, default=datetime.utcnow)
     end_time: Mapped[DateTime] = mapped_column(DateTime)
+    students = relationship('StuAttendance', back_populates='sessions')

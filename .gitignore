@@ -3,6 +3,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.env
+asas_venv/
+setup_mysql_dev.sql
 
 # C extensions
 *.so

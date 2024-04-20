@@ -12,6 +12,11 @@ from sqlalchemy.orm import (
                             relationship
                             )
 
+# student_course = Table('student_course', BaseModel.metadata,
+#                        Column('student_id', ForeignKey('students.id'), primary_key=True),
+#                        Column('course_id', ForeignKey('courses.id'), primary_key=True)
+#                        )
+
 
 class Course(BaseModel, db.Model):
     __tablename__ = 'courses'
@@ -19,4 +24,4 @@ class Course(BaseModel, db.Model):
     course_name: Mapped[str] = mapped_column(String(60), nullable=False)
     course_credit: Mapped[str] = mapped_column(String(60), nullable=False)
     course_category: Mapped[str] = mapped_column(String(60), default='Common', nullable=False)
-    assigns: Mapped[List['AssignedStudent']] = relationship(back_populates='course', cascade='all')
+    assigned_students: Mapped[List['AssignedStudent']] = relationship('AssignedStudent', back_populates='course', cascade='all')

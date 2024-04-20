@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import String, Integer
+from sqlalchemy import String
 from datetime import datetime
 from uuid import uuid4
+from dotenv import load_dotenv
+from os import getenv
 from sqlalchemy.orm import (
                             DeclarativeBase,
                             Mapped,
@@ -11,8 +13,9 @@ from sqlalchemy.orm import (
                             )
 
 
+load_dotenv()
 app = Flask(__name__)
-# app.config['SQLALCHEMY_DATABASE_URI'] = 
+app.config['SQLALCHEMY_DATABASE_URI'] = getenv('DATABASE_URI')
 
 
 class BaseModel(DeclarativeBase):
@@ -21,5 +24,5 @@ class BaseModel(DeclarativeBase):
     updated_at: Mapped[datetime] = mapped_column(String(60), default=datetime.now, onupdate=datetime.now)
 
 
-db = SQLAlchemy(BaseModel)
+db = SQLAlchemy(model_class=BaseModel)
 db.init_app(app)
