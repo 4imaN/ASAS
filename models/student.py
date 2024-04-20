@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
-from sqlalchemy import String, Integer
+from sqlalchemy import String
 from sqlalchemy.orm import (
                             Mapped,
-                            mapped_column
+                            mapped_column,
+                            relationship
                             )
 from models.basemodel import BaseModel
 from models import db
+from models.assigned_students import AssignedStudent
+from typing import List
 
 
 class Student(BaseModel, db.Model):
@@ -22,3 +25,4 @@ class Student(BaseModel, db.Model):
     finger_id: Mapped[str] = mapped_column(String(60))
     rf_id: Mapped[str] = mapped_column(String(60))
     batch_section: Mapped[str] = mapped_column(String(60))
+    courses: Mapped[List['AssignedStudent']] = relationship(back_populates='student', cascade='all')

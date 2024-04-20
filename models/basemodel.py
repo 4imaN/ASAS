@@ -12,6 +12,7 @@ from sqlalchemy.orm import (
 
 
 app = Flask(__name__)
+# app.config['SQLALCHEMY_DATABASE_URI'] = 
 
 
 class BaseModel(DeclarativeBase):
