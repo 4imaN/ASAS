@@ -2,6 +2,7 @@
 
 from models.instructor import Instructor
 from models import db, app
+from datetime import datetime
 import unittest
 import bcrypt
 
@@ -65,3 +66,16 @@ class TestInstructor(unittest.TestCase):
         with app.app_context():
             db.session.add(self.instructor)
             self.assertEqual(self.instructor.password.encode(), self.data['password'])
+
+    def test_update_time(self):
+        """
+        tests if the `updated_at` time of a instructor object is correctly
+        updated when the instructor's field is changed.
+        """
+        with app.app_context():
+            db.session.add(self.instructor)
+            updated_time = datetime.strptime(self.instructor.updated_at, "%Y-%m-%d %H:%M:%S.%f")
+            self.instructor.first_name = "abebe"
+            db.session.commit()
+            new_time = datetime.strptime(self.instructor.updated_at, "%Y-%m-%d %H:%M:%S.%f")
+            self.assertTrue(new_time > updated_time)

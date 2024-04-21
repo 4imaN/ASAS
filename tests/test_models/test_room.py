@@ -2,6 +2,7 @@
 
 from models.room import Room
 from models import db, app
+from datetime import datetime
 import unittest
 
 
@@ -38,3 +39,16 @@ class TestRoom(unittest.TestCase):
 
             self.assertTrue(getattr(self.room, 'room_no'))
             self.assertEqual(self.room.room_no, self.data['room_no'])
+
+    def test_update_time(self):
+        """
+        tests if the `updated_at` time of a room object is correctly
+        updated when the room's field is changed.
+        """
+        with app.app_context():
+            db.session.add(self.room)
+            updated_time = datetime.strptime(self.room.updated_at, "%Y-%m-%d %H:%M:%S.%f")
+            self.room.block_no = "B34"
+            db.session.commit()
+            new_time = datetime.strptime(self.room.updated_at, "%Y-%m-%d %H:%M:%S.%f")
+            self.assertTrue(new_time > updated_time)

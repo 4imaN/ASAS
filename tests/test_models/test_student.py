@@ -2,6 +2,7 @@
 
 from models.student import Student
 from models import db, app
+from datetime import datetime
 import unittest
 import bcrypt
 
@@ -66,3 +67,16 @@ class TestStudent(unittest.TestCase):
         with app.app_context():
             db.session.add(self.student)
             self.assertEqual(self.student.password.encode(), self.data['password'])
+
+    def test_update_time(self):
+        """
+        tests if the `updated_at` time of a student object is correctly
+        updated when the student's field is changed.
+        """
+        with app.app_context():
+            db.session.add(self.student)
+            updated_time = datetime.strptime(self.student.updated_at, "%Y-%m-%d %H:%M:%S.%f")
+            self.student.registered = True
+            db.session.commit()
+            new_time = datetime.strptime(self.student.updated_at, "%Y-%m-%d %H:%M:%S.%f")
+            self.assertTrue(new_time > updated_time)

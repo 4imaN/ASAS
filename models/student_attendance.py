@@ -25,5 +25,6 @@ class StuAttendance(BaseModel, db.Model):
     instructor_id: Mapped[str] = mapped_column(String(60), ForeignKey('instructors.id'), nullable=False)
     room_id: Mapped[str] = mapped_column(String(60), ForeignKey('rooms.id'), nullable=False)
     start_time: Mapped[DateTime] = mapped_column(DateTime, default=datetime.utcnow)
-    end_time: Mapped[DateTime] = mapped_column(DateTime)
+    end_time: Mapped[DateTime] = mapped_column(DateTime, nullable=True)
     student = relationship('Student', back_populates='student_attendance')
+    session = relationship('InstAttendance', back_populates='student_attendance')

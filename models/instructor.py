@@ -7,7 +7,9 @@ from sqlalchemy.orm import (
                             )
 from models.basemodel import BaseModel
 from models import db
+from models.instructor_session import InstAttendance
 from models.assigned_students import AssignedStudent
+from models.booked_room import Booked
 from typing import List
 
 
@@ -25,3 +27,5 @@ class Instructor(BaseModel, db.Model):
     rf_id: Mapped[str] = mapped_column(String(60), nullable=True)
     qualification: Mapped[str] = mapped_column(String(60), nullable=False)
     assigned_students: Mapped[List['AssignedStudent']] = relationship('AssignedStudent', back_populates='instructor')
+    sessions: Mapped[List['InstAttendance']] = relationship('InstAttendance', back_populates='instructor', cascade='all')
+    booked_rooms: Mapped[List['Booked']] = relationship('Booked', back_populates='instructor', cascade='all')
