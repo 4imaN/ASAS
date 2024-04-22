@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_admin import Admin
 from sqlalchemy import String
 from datetime import datetime
 from uuid import uuid4
@@ -16,6 +17,7 @@ from sqlalchemy.orm import (
 load_dotenv()
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = getenv('DATABASE_URI')
+admin = Admin(app, name="Admin Only")
 
 
 class BaseModel(DeclarativeBase):
@@ -26,3 +28,9 @@ class BaseModel(DeclarativeBase):
 
 db = SQLAlchemy(model_class=BaseModel)
 db.init_app(app)
+
+
+class Role(BaseModel, db.Model):
+    __tablename__ = 'roles'
+    name: Mapped[str] = mapped_column(String(60), unique=True)
+    description: Mapped[str] = mapped_column(String(255))

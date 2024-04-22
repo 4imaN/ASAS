@@ -3,7 +3,7 @@
 from models.instructor import Instructor
 from models import db, app
 from datetime import datetime
-import unittest
+import unittest, time
 import bcrypt
 
 

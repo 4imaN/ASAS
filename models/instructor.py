@@ -6,7 +6,7 @@ from sqlalchemy.orm import (
                             relationship
                             )
 from models.basemodel import BaseModel
-from models import db
+from models import db, admin
 from models.instructor_session import InstAttendance
 from models.assigned_students import AssignedStudent
 from models.booked_room import Booked
@@ -21,7 +21,7 @@ class Instructor(BaseModel, db.Model):
     gender: Mapped[str] = mapped_column(String(2), nullable=False)
     teacher_id: Mapped[str] = mapped_column(String(60), unique=True)
     email: Mapped[str] = mapped_column(String(60), unique=True)
-    password: Mapped[str] = mapped_column(String(60), nullable=False)
+    password: Mapped[str] = mapped_column(String(255), nullable=False)
     department: Mapped[str] = mapped_column(String(100), nullable=False)
     finger_id: Mapped[str] = mapped_column(String(60), nullable=True)
     rf_id: Mapped[str] = mapped_column(String(60), nullable=True)

@@ -1,31 +1,29 @@
 #!/usr/bin/env python3
-from sqlalchemy import String
-from flask_admin.contrib.sqla import ModelView
+from sqlalchemy import String, Table, Column, ForeignKey
 from sqlalchemy.orm import (
                             Mapped,
                             mapped_column,
                             relationship
                             )
 from models.basemodel import BaseModel
-from models import db, admin
-from models.assigned_students import AssignedStudent
-from models.student_attendance import StuAttendance
-from typing import List
+from models import db, app
 
 
-class Student(BaseModel, db.Model):
-    __tablename__ = 'students'
+admin_roles = Table('admin_roles',
+                    BaseModel.metadata,
+                    Column('admin_id', String(60), ForeignKey('admins.id')),
+                    Column('role_id', String(60), ForeignKey('roles.id')))
+
+
+class AdminUser(BaseModel, db.Model):
+    __tablename__ = 'admins'
     first_name: Mapped[str] = mapped_column(String(60), nullable=False)
     middle_name: Mapped[str] = mapped_column(String(60), nullable=False)
     last_name: Mapped[str] = mapped_column(String(60), nullable=False)
     gender: Mapped[str] = mapped_column(String(2), nullable=False)
-    registered: Mapped[bool] = mapped_column(nullable=False, default=True)
-    student_id: Mapped[str] = mapped_column(String(60), unique=True)
     email: Mapped[str] = mapped_column(String(60), unique=True)
     password: Mapped[str] = mapped_column(String(255), nullable=False)
     department: Mapped[str] = mapped_column(String(100), nullable=False)
     finger_id: Mapped[str] = mapped_column(String(60), nullable=True)
     rf_id: Mapped[str] = mapped_column(String(60), nullable=True)
-    batch_section: Mapped[str] = mapped_column(String(60), nullable=False)
-    assigned_students: Mapped[List['AssignedStudent']] = relationship('AssignedStudent', back_populates='student')
-    student_attendance: Mapped[List['StuAttendance']] = relationship(back_populates='student')
+    roles = relationship('Role', secondary=admin_roles, backref='admins')
