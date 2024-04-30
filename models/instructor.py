@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from sqlalchemy import String
+from sqlalchemy import String, Column, ForeignKey, Table
 from sqlalchemy.orm import (
                             Mapped,
                             mapped_column,
@@ -11,6 +11,13 @@ from models.instructor_session import InstAttendance
 from models.assigned_students import AssignedStudent
 from models.booked_room import Booked
 from typing import List
+
+
+instructor_roles = Table('instructor_roles',
+                    BaseModel.metadata,
+                    Column('instructor_id', String(60), ForeignKey('instructors.id')),
+                    Column('role_id', String(60), ForeignKey('roles.id')))
+
 
 
 class Instructor(BaseModel, db.Model):
@@ -29,3 +36,5 @@ class Instructor(BaseModel, db.Model):
     assigned_students: Mapped[List['AssignedStudent']] = relationship('AssignedStudent', back_populates='instructor')
     sessions: Mapped[List['InstAttendance']] = relationship('InstAttendance', back_populates='instructor', cascade='all')
     booked_rooms: Mapped[List['Booked']] = relationship('Booked', back_populates='instructor', cascade='all')
+    roles = relationship('Role', secondary=instructor_roles, backref='instructors')
+

@@ -11,14 +11,44 @@ from models.assigned_students import AssignedStudent
 from models.student_attendance import StuAttendance
 from models.admin_user import AdminUser
 from models.instructor_session import InstAttendance
+from flask_security import Security, SQLAlchemyUserDatastore, current_user, RoleMixin
+from os import getenv
 
 
-admin.add_view(ModelView(Student, db.session))
-admin.add_view(ModelView(Instructor, db.session))
-admin.add_view(ModelView(Room, db.session))
-admin.add_view(ModelView(AssignedStudent, db.session))
-admin.add_view(ModelView(Course, db.session))
-admin.add_view(ModelView(StuAttendance, db.session))
-admin.add_view(ModelView(Booked, db.session))
-admin.add_view(ModelView(AdminUser, db.session))
-admin.add_view(ModelView(InstAttendance, db.session))
+app.config['SECRET_KEY'] = getenv('SECRET_KEY')
+app.config['SECURITY_PASSWORD_HASH'] = 'bcrypt'
+app.config['SECURITY_PASSWORD_SALT'] = getenv('SALT')
+app.config['SECURITY_TRACKABLE'] = True
+app.config['SESSION_TYPE'] = 'cookie'
+app.config['SESSION_COOKIE_NAME'] = 'session'
+app.config['SESSION_COOKIE_PATH'] = '/'
+app.config['SESSION_COOKIE_SECURE'] = True
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+
+
+# class CustomRoleMixin(RoleMixin):
+#     def can(self, role):
+#         return role in self.roles
+
+admin_datastore = SQLAlchemyUserDatastore(db, AdminUser, Role)
+security = Security(app, admin_datastore)
+
+
+
+
+class NewView(ModelView):
+    # flask admin panel
+    def is_accessible(self):
+        # return current_user.is_authenticated and current_user.has_role('admin')
+        return True
+
+
+admin.add_view(NewView(Student, db.session))
+admin.add_view(NewView(Instructor, db.session))
+admin.add_view(NewView(Room, db.session))
+admin.add_view(NewView(AssignedStudent, db.session))
+admin.add_view(NewView(Course, db.session))
+admin.add_view(NewView(StuAttendance, db.session))
+admin.add_view(NewView(Booked, db.session))
+admin.add_view(NewView(AdminUser, db.session))
+admin.add_view(NewView(InstAttendance, db.session))

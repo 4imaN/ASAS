@@ -25,6 +25,9 @@ class BaseModel(DeclarativeBase):
     created_at: Mapped[datetime] = mapped_column(String(60), default=datetime.now)
     updated_at: Mapped[datetime] = mapped_column(String(60), default=datetime.now, onupdate=datetime.now)
 
+    def get_id(self):
+        return self.id
+
 
 db = SQLAlchemy(model_class=BaseModel)
 db.init_app(app)

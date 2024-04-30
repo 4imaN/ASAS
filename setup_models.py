@@ -11,18 +11,12 @@ if __name__ == '__main__':
     from models.student_attendance import StuAttendance
     from models.admin_user import AdminUser
     from models import app, db, Role
-    from flask_security import Security, SQLAlchemyUserDatastore
-    from os import getenv
-
-
-    app.config['SECRET_KEY'] = getenv('SECRET_KEY')
-    app.config['SECURITY_PASSWORD_SALT'] = getenv('SALT')
-
+    
 
     with app.app_context():
         db.create_all()
-        admin_datastore = SQLAlchemyUserDatastore(db, AdminUser, Role)
-        app.security = Security(app, admin_datastore)
-        admin_role = Role(name='admin', description='Administrator')
+        admin_role = Role(name='admin', description='Access only to Administrator')
+        teacher_role = Role(name='instructor', description='Access only to Instructor')
         db.session.add(admin_role)
+        db.session.add(teacher_role)
         db.session.commit()

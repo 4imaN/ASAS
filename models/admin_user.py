@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from sqlalchemy import String, Table, Column, ForeignKey
+from sqlalchemy import String, Table, Column, ForeignKey, DateTime, Integer
 from sqlalchemy.orm import (
                             Mapped,
                             mapped_column,
@@ -27,3 +27,16 @@ class AdminUser(BaseModel, db.Model):
     finger_id: Mapped[str] = mapped_column(String(60), nullable=True)
     rf_id: Mapped[str] = mapped_column(String(60), nullable=True)
     roles = relationship('Role', secondary=admin_roles, backref='admins')
+
+    # setups for flask-security
+    active: Mapped[str] = mapped_column(String(60))
+    is_active = mapped_column(String(60), default=True, nullable=False)
+    current_login_at: Mapped[DateTime] = mapped_column(DateTime, nullable=True)
+    current_login_ip: Mapped[str] = mapped_column(String(60), nullable=True)
+    login_count: Mapped[int] = mapped_column(Integer, nullable=True)
+    confirmed_at: Mapped[DateTime] = mapped_column(DateTime, nullable=True)
+    is_authenticated = None
+
+    @property
+    def is_authenticated(self):
+        return self.is_active
