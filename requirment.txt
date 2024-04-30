@@ -5,6 +5,7 @@ click==8.1.7
 Flask==2.2.5
 Flask-Admin==1.6.1
 Flask-BabelEx==0.9.4
+Flask-Cors==4.0.0
 Flask-JWT-Extended==4.6.0
 Flask-Login==0.6.3
 Flask-Mail==0.9.1
