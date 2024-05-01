@@ -11,8 +11,8 @@ from datetime import datetime
 
 
 @app_views.route('/admin/auth/register', methods=['GET', 'POST'], strict_slashes=False)
-# @roles_required('admin')
-# @auth_required('token', 'session')
+@roles_required('admin')
+@auth_required('token', 'session')
 def admin_reg():
     if request.method == 'POST':
         # below line is for testing purpose
