@@ -13,6 +13,7 @@ from models.admin_user import AdminUser
 from models.instructor_session import InstAttendance
 from flask_security import Security, SQLAlchemyUserDatastore, current_user, RoleMixin
 from os import getenv
+# import logging
 
 
 app.config['SECRET_KEY'] = getenv('SECRET_KEY')
@@ -24,6 +25,9 @@ app.config['SESSION_COOKIE_NAME'] = 'session'
 app.config['SESSION_COOKIE_PATH'] = '/'
 app.config['SESSION_COOKIE_SECURE'] = True
 app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['DEFAULT_REMEMBER_ME'] = True
+# app.config['DEBUG'] = True
+# app.logger.setLevel(logging.DEBUG)
 
 
 # class CustomRoleMixin(RoleMixin):
