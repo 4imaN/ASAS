@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+
 
 from flask_admin.contrib.sqla import ModelView
 from models.basemodel import app, db, admin, Role
@@ -11,7 +11,7 @@ from models.assigned_students import AssignedStudent
 from models.student_attendance import StuAttendance
 from models.admin_user import AdminUser
 from models.instructor_session import InstAttendance
-from flask_security import Security, SQLAlchemyUserDatastore, current_user, RoleMixin
+from flask_security import Security, SQLAlchemyUserDatastore, current_user, SQLAlchemySessionUserDatastore
 from os import getenv
 # import logging
 
@@ -26,16 +26,17 @@ app.config['SESSION_COOKIE_PATH'] = '/'
 app.config['SESSION_COOKIE_SECURE'] = True
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['DEFAULT_REMEMBER_ME'] = True
-# app.config['DEBUG'] = True
-# app.logger.setLevel(logging.DEBUG)
+app.config['JWT_SECRET_KEY'] = getenv('SECRET_KEY')
+app.config['BLUEPRINT_NAME'] = 'instructor_security'
 
 
-# class CustomRoleMixin(RoleMixin):
-#     def can(self, role):
-#         return role in self.roles
 
 admin_datastore = SQLAlchemyUserDatastore(db, AdminUser, Role)
-security = Security(app, admin_datastore)
+instructor_datastore = SQLAlchemyUserDatastore(db, Instructor, Role)
+student_datastore = SQLAlchemyUserDatastore(db, Student, Role)
+
+security = Security(app, datastore=admin_datastore)
+
 
 
 
@@ -43,8 +44,8 @@ security = Security(app, admin_datastore)
 class NewView(ModelView):
     # flask admin panel
     def is_accessible(self):
-        # return current_user.is_authenticated and current_user.has_role('admin')
-        return True
+        return current_user.is_authenticated and current_user.has_role('admin')
+        # return True
 
 
 admin.add_view(NewView(Student, db.session))

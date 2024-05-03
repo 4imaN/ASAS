@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+
 from sqlalchemy import String, Table, Column, ForeignKey, DateTime, Integer
 from sqlalchemy.orm import (
                             Mapped,
@@ -7,6 +7,7 @@ from sqlalchemy.orm import (
                             )
 from models.basemodel import BaseModel
 from models import db, app
+from flask_security import UserMixin
 
 
 admin_roles = Table('admin_roles',
@@ -15,7 +16,7 @@ admin_roles = Table('admin_roles',
                     Column('role_id', String(60), ForeignKey('roles.id')))
 
 
-class AdminUser(BaseModel, db.Model):
+class AdminUser(db.Model, UserMixin):
     __tablename__ = 'admins'
     first_name: Mapped[str] = mapped_column(String(60), nullable=False)
     middle_name: Mapped[str] = mapped_column(String(60), nullable=False)
@@ -29,14 +30,13 @@ class AdminUser(BaseModel, db.Model):
     roles = relationship('Role', secondary=admin_roles, backref='admins')
 
     # setups for flask-security
-    active: Mapped[str] = mapped_column(String(60))
-    is_active = mapped_column(String(60), default=True, nullable=False)
+    active: Mapped[str] = mapped_column(String(60), nullable=True)
+    def is_active(self):
+        return super().is_active
+    # is_active = mapped_column(String(60), default=True, nullable=False)
     current_login_at: Mapped[DateTime] = mapped_column(DateTime, nullable=True)
     current_login_ip: Mapped[str] = mapped_column(String(60), nullable=True)
     login_count: Mapped[int] = mapped_column(Integer, nullable=True)
     confirmed_at: Mapped[DateTime] = mapped_column(DateTime, nullable=True)
-    is_authenticated = None
-
-    @property
     def is_authenticated(self):
-        return self.is_active
+        return super().is_authenticated()

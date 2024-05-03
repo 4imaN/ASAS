@@ -1,13 +1,40 @@
-#!/usr/bin/env python3
-from models import db, app
-from flask import jsonify, make_response
+
+from models import db, app, instructor_datastore, \
+    admin_datastore, student_datastore
+from flask import jsonify, make_response, session, request
 from flask_cors import CORS
 from api.v1.views import app_views
+from flask_security import Security
+from flask_jwt_extended import get_current_user, jwt_required, verify_jwt_in_request
 
 
 
 CORS(app, resources={r"/*": {"origins": "0.0.0.0"}})
 app.register_blueprint(app_views)
+
+
+# @app.before_request
+# def check_user():
+#     try:
+#         verify_jwt_in_request(locations=['headers'])
+#         user, user_type = get_current_user()
+#         print(session)
+#     #     if user_type == 'admin':
+#     #         print(0)
+#     #         security = Security(app, datastore=admin_datastore,
+#     #                           register_blueprint=False)
+#     #     elif user_type == 'instructor':
+#     #         print(1)
+#     #         security.init_app(app, datastore=instructor_datastore,
+#     #                           register_blueprint=False)
+#     #     elif user_type == 'student':
+#     #         print(2)
+#     #         security.init_app(app, datastore=student_datastore,
+#     #                           register_blueprint=False)
+#     except Exception as e:
+#         print(e)
+#         return
+#     pass
 
 
 @app.teardown_appcontext

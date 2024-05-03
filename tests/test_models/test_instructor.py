@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+
 
 from models.instructor import Instructor
 from models import db, app

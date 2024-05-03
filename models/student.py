@@ -1,5 +1,5 @@
-#!/usr/bin/env python3
-from sqlalchemy import String
+
+from sqlalchemy import String, Boolean
 from flask_admin.contrib.sqla import ModelView
 from sqlalchemy.orm import (
                             Mapped,
@@ -19,13 +19,14 @@ class Student(BaseModel, db.Model):
     middle_name: Mapped[str] = mapped_column(String(60), nullable=False)
     last_name: Mapped[str] = mapped_column(String(60), nullable=False)
     gender: Mapped[str] = mapped_column(String(2), nullable=False)
-    registered: Mapped[bool] = mapped_column(nullable=False, default=True)
+    registered: Mapped[Boolean] = mapped_column(Boolean, nullable=False, default=True)
     student_id: Mapped[str] = mapped_column(String(60), unique=True)
     email: Mapped[str] = mapped_column(String(60), unique=True)
     password: Mapped[str] = mapped_column(String(255), nullable=False)
     department: Mapped[str] = mapped_column(String(100), nullable=False)
     finger_id: Mapped[str] = mapped_column(String(60), nullable=True)
     rf_id: Mapped[str] = mapped_column(String(60), nullable=True)
+    add: Mapped[Boolean] = mapped_column(Boolean, default=False, nullable=False)
     batch_section: Mapped[str] = mapped_column(String(60), nullable=False)
     assigned_students: Mapped[List['AssignedStudent']] = relationship('AssignedStudent', back_populates='student')
     student_attendance: Mapped[List['StuAttendance']] = relationship(back_populates='student')

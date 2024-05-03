@@ -1,5 +1,5 @@
-#!/usr/bin/env python3
-from sqlalchemy import String, Column, ForeignKey, Table
+
+from sqlalchemy import String, Column, ForeignKey, Table, DateTime, Integer
 from sqlalchemy.orm import (
                             Mapped,
                             mapped_column,
@@ -11,6 +11,7 @@ from models.instructor_session import InstAttendance
 from models.assigned_students import AssignedStudent
 from models.booked_room import Booked
 from typing import List
+from flask_security import UserMixin
 
 
 instructor_roles = Table('instructor_roles',
@@ -20,7 +21,7 @@ instructor_roles = Table('instructor_roles',
 
 
 
-class Instructor(BaseModel, db.Model):
+class Instructor(db.Model, UserMixin):
     __tablename__ = 'instructors'
     first_name: Mapped[str] = mapped_column(String(60), nullable=False)
     middle_name: Mapped[str] = mapped_column(String(60), nullable=False)
@@ -37,4 +38,18 @@ class Instructor(BaseModel, db.Model):
     sessions: Mapped[List['InstAttendance']] = relationship('InstAttendance', back_populates='instructor', cascade='all')
     booked_rooms: Mapped[List['Booked']] = relationship('Booked', back_populates='instructor', cascade='all')
     roles = relationship('Role', secondary=instructor_roles, backref='instructors')
+
+
+   # setups for flask-security
+    active: Mapped[str] = mapped_column(String(60), nullable=True)
+    def is_active(self):
+        return super().is_active
+    # is_active = mapped_column(String(60), default=True, nullable=False)
+    current_login_at: Mapped[DateTime] = mapped_column(DateTime, nullable=True)
+    current_login_ip: Mapped[str] = mapped_column(String(60), nullable=True)
+    login_count: Mapped[int] = mapped_column(Integer, nullable=True)
+    confirmed_at: Mapped[DateTime] = mapped_column(DateTime, nullable=True)
+    def is_authenticated(self):
+        return super().is_authenticated()
+
 

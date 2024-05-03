@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+
 
 
 from flask_mail import Message, Mail

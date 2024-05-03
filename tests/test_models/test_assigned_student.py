@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+
 
 from models.student import Student
 from models.instructor import Instructor
