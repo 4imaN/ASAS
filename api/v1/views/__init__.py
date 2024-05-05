@@ -7,3 +7,4 @@ from api.v1.views.admin_routes import *
 from api.v1.views.instructor_routes import *
 from api.v1.views.student_route import *
 from api.v1.auth.jwt_auth import *
+from api.v1.views.course import *

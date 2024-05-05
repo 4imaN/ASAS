@@ -11,11 +11,11 @@ from api.v1.views import app_views
 
 
 @app_views.route('/student/auth/register', methods=['POST'], strict_slashes=False)
-@jwt_required(9)
+@jwt_required()
 def student_reg():
     admin_user, user_type = get_current_user()
     if user_type == 'admin':
-        if request.method == 'POST':
+        if request.method == 'POST' or admin_user.confirmed_at:
             # below line is for testing purpose
             request.form = request.get_json()
             first_name = request.form.get('first_name', None)
@@ -28,6 +28,7 @@ def student_reg():
             student_id = request.form.get('student_id', None)
             batch_section = request.form.get('batch_section', None)
             password = hash_password(password)
+            print(password)
             if instructor_datastore.get_user(email) or admin_datastore.get_user(email) or student_datastore.get_user(email):
                 return make_response(jsonify({'error': 'Email already exists'}), 400)
             try:
@@ -46,6 +47,7 @@ def student_reg():
                 return make_response(jsonify({'email': student.email, 'student': True, 'id': student.id}), 201)
             except (SQLAlchemyError, OperationalError, IntegrityError) as e:
                 return make_response(jsonify({'error': str(e), 'student': False}), 400)
+        return make_response(jsonify({'error': 'email not verified'}), 400)
     return make_response(jsonify({'error': 'url doesnt exist'}), 400)
 
 
@@ -77,6 +79,8 @@ def student_update(id):
         user, user_type = get_current_user()
         if user.confirmed_at:
             student = student_datastore.find_user(id=id)
+            if not student:
+                return make_response(jsonify({'error': 'student not found'}), 400)
             if user_type == 'admin':
                 updatables = ['student_id',
                         'password', 'department', 'finger_id',
@@ -87,9 +91,11 @@ def student_update(id):
                     if k not in updatables:
                         return jsonify({'error': f'key {k} not updatable or not available'}), 400
                 for k, v in data.items():
+                    if k == 'password':
+                        v = hash_password(v)
                     setattr(student, k, v)
                 student_datastore.commit()
-                res_dict = {k: getattr(student, k) for k in updatables if k in data.keys()}
+                res_dict = {k: getattr(student, k) for k in updatables if k in data.keys() and k != 'password'}
                 res_dict.update({'updated': True})
                 return jsonify(res_dict), 200
             elif user_type == 'student':
@@ -99,13 +105,94 @@ def student_update(id):
                     if k not in updatables:
                         return jsonify({'error': f'key {k} not updatable or not available'}), 400
                 for k, v in data.items():
+                    if k == 'password':
+                        v = hash_password(v)
                     setattr(student, k, v)
                 student_datastore.commit()
-                res_dict = {k: getattr(student, k) for k in updatables if k in data.keys()}
+                res_dict = {k: getattr(student, k) for k in updatables if k in data.keys() and k != 'password'}
                 res_dict.update({'updated': True})
                 return jsonify(res_dict), 200
             else:
-                return make_response(jsonify({"error": 'url doesnt exist'}), 400)
+                return make_response(jsonify({"error": 'URL doesnt exist'}), 404)
         return jsonify({'error': 'user needs to confirm first', 'updated': False}), 400
     except Exception as e:
         return make_response(jsonify({'error': str(e)}), 400)
+
+
+
+@app_views.route('/student/delete/<id>', methods=['DELETE'], strict_slashes=False)
+@jwt_required()
+def student_del(id):
+    admin_user, user_type = get_current_user()
+    if user_type == 'admin':
+        student = student_datastore.find_user(id=id)
+        if admin_user.confirmed_at:
+            student_datastore.deactivate_user(student)
+            student_datastore.delete(student)
+            student_datastore.commit()
+            return jsonify({'msg': True}), 200
+        return jsonify({'error': 'user needs to confirm first', 'deleted': False}), 400
+    return make_response(jsonify({"error": 'URL doesnt exist'}), 404)
+
+
+
+@app_views.route('/student/<rf_id>', methods=['GET'], strict_slashes=False)
+def student_check_rf_id(rf_id):
+    student = student_datastore.find_user(rf_id=rf_id)
+    if not student:
+        return jsonify({'verified': False}), 400
+    elif student and not student.confirmed_at:
+        return jsonify({'verified': False, 'id': student.id,
+                        'first_name': student.first_name,
+                        'RFID_verification': True}), 200
+    elif student and student.confirmed_at:
+        return jsonify({'verified': True, 'id': student.id,
+                        'first_name': student.first_name,
+                        'RFID_verification': True}), 200
+
+
+@app_views.route('/student/<finger_id>', methods=['GET'], strict_slashes=False)
+def student_check_finger_id(finger_id):
+    student = student_datastore.find_user(finger_id=finger_id)
+    if not student:
+        return jsonify({'verified': False}), 400
+    elif student and not student.confirmed_at:
+        return jsonify({'verified': False, 'id': student.id,
+                        'first_name': student.first_name,
+                        'biometric_verification': True}), 200
+    elif student and student.confirmed_at:
+        return jsonify({'verified': True, 'id': student.id,
+                        'first_name': student.first_name,
+                        'biometric_verification': True}), 200
+
+
+@app_views.route('/student/auth/logout', methods=['GET', 'POST'], strict_slashes=False)
+def student_logout():
+    student, user_type = get_current_user()
+    if user_type == 'student':
+        if student and student.confirmed_at:
+            logout_user()
+            res = make_response(jsonify({'msg': True}), 200)
+            unset_access_cookies(res)
+            return res
+        return jsonify({'error': 'either user doesnt exist or account not verified yet'}), 400
+    return make_response(jsonify({"error": 'URL doesnt exist'}), 404)
+
+
+@app_views.route('/student/me', methods=['GET'], strict_slashes=False)
+@jwt_required()
+def student_me():
+    student, user_type = get_current_user()
+    if user_type == 'student':
+        return make_response(jsonify({'first_name': student.first_name,
+                                      'middle_name': student.middle_name,
+                                      'last_name': student.last_name,
+                                      'gender': student.gender,
+                                      'registered': student.registered,
+                                      'student_id': student.student_id,
+                                      'email': student.email,
+                                      'department': student.department,
+                                      'batch': student.batch_section.split(" ")[0],
+                                      'section': student.batch_section.split(" ")[1]
+                                      }), 200)
+    return make_response(jsonify({'error': 'URL doesnt exist'}), 404)

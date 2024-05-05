@@ -47,7 +47,7 @@ def instructor_reg():
                 return make_response(jsonify({'email': instructor.email, 'instructor': True, 'id': instructor.id}), 201)
             except (SQLAlchemyError, OperationalError, IntegrityError) as e:
                 return make_response(jsonify({'error': str(e), 'instructor': False}), 400)
-        return make_response(jsonify({"error": 'url doesnt exist'}), 400)
+        return make_response(jsonify({"error": 'URL doesnt exist'}), 404)
 
 
 @app_views.route('/instructor/auth/login', methods=['POST'], strict_slashes=False)
@@ -80,6 +80,8 @@ def instructor_update(id):
         user, user_type = get_current_user()
         if user.confirmed_at:
             instructor = instructor_datastore.find_user(id=id)
+            if not instructor:
+                return make_response(jsonify({'error': 'intructor not found'}), 400)
             if user_type == 'admin':
                 updatables = ['teacher_id',
                         'password', 'department', 'finger_id',
@@ -89,9 +91,11 @@ def instructor_update(id):
                     if k not in updatables:
                         return jsonify({'error': f'key {k} not updatable or not available'}), 400
                 for k, v in data.items():
+                    if k == 'password':
+                        v = hash_password(v)
                     setattr(instructor, k, v)
                 instructor_datastore.commit()
-                res_dict = {k: getattr(instructor, k) for k in updatables if k in data.keys()}
+                res_dict = {k: getattr(instructor, k) for k in updatables if k in data.keys() and k != 'password'}
                 res_dict.update({'updated': True})
                 return jsonify(res_dict), 200
             elif user_type == 'instructor':
@@ -101,13 +105,15 @@ def instructor_update(id):
                     if k not in updatables:
                         return jsonify({'error': f'key {k} not updatable or not available'}), 400
                 for k, v in data.items():
+                    if k == 'password':
+                        v = hash_password(v)
                     setattr(instructor, k, v)
                 instructor_datastore.commit()
-                res_dict = {k: getattr(instructor, k) for k in updatables if k in data.keys()}
+                res_dict = {k: getattr(instructor, k) for k in updatables if k in data.keys() and k != 'password'}
                 res_dict.update({'updated': True})
                 return jsonify(res_dict), 200
             else:
-                return make_response(jsonify({"error": 'url doesnt exist'}), 400)
+                return make_response(jsonify({"error": 'URL doesnt exist'}), 404)
         return jsonify({'error': 'user needs to confirm first', 'updated': False}), 400
     except Exception as e:
         return make_response(jsonify({'error': str(e)}), 400)
@@ -125,7 +131,7 @@ def instructor_del(id):
             instructor_datastore.commit()
             return jsonify({'msg': True}), 200
         return jsonify({'error': 'user needs to confirm first', 'deleted': False}), 400
-    return make_response(jsonify({"error": 'url doesnt exist'}), 400)
+    return make_response(jsonify({"error": 'URL doesnt exist'}), 404)
 
 
 @app_views.route('/instructor/<rf_id>', methods=['GET'], strict_slashes=False)
@@ -167,8 +173,24 @@ def instructor_logout():
             unset_access_cookies(res)
             return res
         return jsonify({'error': 'either user doesnt exist or account not verified yet'}), 400
-    return make_response(jsonify({"error": 'url doesnt exist'}), 400)
+    return make_response(jsonify({"error": 'URL doesnt exist'}), 404)
 
+
+@app_views.route('/instructor/me', methods=['GET'], strict_slashes=False)
+@jwt_required()
+def instructor_me():
+    instructor, user_type = get_current_user()
+    if user_type == 'instructor':
+        return make_response(jsonify({'first_name': instructor.first_name,
+                                      'middle_name': instructor.middle_name,
+                                      'last_name': instructor.last_name,
+                                      'gender': instructor.gender,
+                                      'teacher_id': instructor.teacher_id,
+                                      'email': instructor.email,
+                                      'department': instructor.department,
+                                      'qualification': instructor.qualification,
+                                      }), 200)
+    return make_response(jsonify({'error': 'URL doesnt exist'}), 404)
 
 
 # @app_views.route('/instructor/assign-student/')

@@ -87,7 +87,19 @@ def verify_email(token):
                     return make_response(jsonify({'error': 'already verified'}), 400)
             except Exception:
                 # try block must be implemented for students
-                return make_response(jsonify({}), 400)
+                try:
+                    student = student_datastore.find_user(email=email)
+                    if not student:
+                        raise NoResultFound('User not student')
+                    if not student.confirmed_at:
+                        student.confirmed_at = datetime.now()
+                        student_datastore.commit()
+                        return make_response(jsonify({'email': student.email, 'verified': True,
+                                                    'type': student.__class__.__name__}), 200)
+                    else:
+                        return make_response(jsonify({'error': 'already verified'}), 400)
+                except Exception:
+                    return make_response(jsonify({}), 400)
 
     except Exception as e:
         return jsonify({'error': str(e), 'verified': False}), 400
@@ -126,9 +138,11 @@ def admin_update():
                 if k not in updatables:
                     return jsonify({'error': f'key {k} not updatable or not available'}), 400
             for k, v in data.items():
+                if k == 'password':
+                        v = hash_password(v)
                 setattr(admin_user, k, v)
             admin_datastore.commit()
-            res_dict = {k: getattr(admin_user, k) for k in updatables if k in data.keys()}
+            res_dict = {k: getattr(admin_user, k) for k in updatables if k in data.keys() and k != 'password'}
             res_dict.update({'updated': True})
             return jsonify(res_dict), 200
         return jsonify({'error': 'user needs to confirm first', 'updated': False}), 400
@@ -191,3 +205,18 @@ def admin_logout():
             return res
         return jsonify({'error': 'either user doesnt exist or account not verified yet'}), 400
     return make_response(jsonify({"error": 'url doesnt exist'}), 400)
+
+
+@app_views.route('/admin/me', methods=['GET'], strict_slashes=False)
+@jwt_required()
+def admin_me():
+    admin, user_type = get_current_user()
+    if user_type == 'admin':
+        return make_response(jsonify({'first_name': admin.first_name,
+                                      'middle_name': admin.middle_name,
+                                      'last_name': admin.last_name,
+                                      'gender': admin.gender,
+                                      'email': admin.email,
+                                      'department': admin.department,
+                                      }), 200)
+    return make_response(jsonify({'error': 'url doesnt exist'}), 400)
