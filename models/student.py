@@ -9,7 +9,7 @@ from sqlalchemy.orm import (
                             )
 from models.basemodel import BaseModel
 from models import db, admin
-from models.assigned_students import AssignedStudent
+from models.assigned_students import assign_students
 from models.student_attendance import StuAttendance
 from typing import List
 
@@ -34,7 +34,7 @@ class Student(BaseModel, db.Model):
     rf_id: Mapped[str] = mapped_column(String(60), nullable=True)
     add: Mapped[Boolean] = mapped_column(Boolean, default=False, nullable=False)
     batch_section: Mapped[str] = mapped_column(String(60), nullable=False)
-    assigned_students: Mapped[List['AssignedStudent']] = relationship('AssignedStudent', back_populates='student')
+
     student_attendance: Mapped[List['StuAttendance']] = relationship(back_populates='student')
     roles = relationship('Role', secondary=student_roles, backref='students')
 

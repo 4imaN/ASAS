@@ -163,7 +163,7 @@ def admin_del():
     return make_response(jsonify({"error": 'url doesnt exist'}), 400)
 
 
-@app_views.route('/admin/<finger_id>', methods=['GET'], strict_slashes=False)
+@app_views.route('/admin/fingerid/<finger_id>', methods=['GET'], strict_slashes=False)
 def admin_check_finger_id(finger_id):
     admin_user = admin_datastore.find_user(finger_id=finger_id)
     if not admin_user:
@@ -178,7 +178,7 @@ def admin_check_finger_id(finger_id):
                         'biometric_verification': True}), 200
 
 
-@app_views.route('/admin/<rf_id>', methods=['GET'], strict_slashes=False)
+@app_views.route('/admin/rfid/<rf_id>', methods=['GET'], strict_slashes=False)
 def admin_check_rf_id(rf_id):
     admin_user = admin_datastore.find_user(rf_id=rf_id)
     if not admin_user:

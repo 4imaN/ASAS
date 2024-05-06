@@ -8,7 +8,7 @@ from sqlalchemy.orm import (
 from models.basemodel import BaseModel
 from models import db, admin
 from models.instructor_session import InstAttendance
-from models.assigned_students import AssignedStudent
+from models.assigned_students import assign_instructors
 from models.booked_room import Booked
 from typing import List
 from flask_security import UserMixin
@@ -34,7 +34,6 @@ class Instructor(db.Model, UserMixin):
     finger_id: Mapped[str] = mapped_column(String(60), nullable=True)
     rf_id: Mapped[str] = mapped_column(String(60), nullable=True)
     qualification: Mapped[str] = mapped_column(String(60), nullable=False)
-    assigned_students: Mapped[List['AssignedStudent']] = relationship('AssignedStudent', back_populates='instructor')
     sessions: Mapped[List['InstAttendance']] = relationship('InstAttendance', back_populates='instructor', cascade='all')
     booked_rooms: Mapped[List['Booked']] = relationship('Booked', back_populates='instructor', cascade='all')
     roles = relationship('Role', secondary=instructor_roles, backref='instructors')

@@ -26,4 +26,5 @@ class InstAttendance(BaseModel, db.Model):
     start_time: Mapped[DateTime] = mapped_column(DateTime, default=datetime.utcnow)
     end_time: Mapped[str] = mapped_column(String(60), nullable=True)
     student_attendance: Mapped[List['StuAttendance']] = relationship(back_populates='session', cascade='all')
+    verfied: Mapped[bool] = mapped_column(default=False)
     instructor = relationship('Instructor', back_populates='sessions')

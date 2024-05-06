@@ -13,6 +13,10 @@ from api.v1.views import app_views
 @app_views.route('/student/auth/register', methods=['POST'], strict_slashes=False)
 @jwt_required()
 def student_reg():
+    """
+    registers a new student in the system if the current user is an admin and
+    handles error responses accordingly.
+    """
     admin_user, user_type = get_current_user()
     if user_type == 'admin':
         if request.method == 'POST' or admin_user.confirmed_at:
@@ -28,7 +32,6 @@ def student_reg():
             student_id = request.form.get('student_id', None)
             batch_section = request.form.get('batch_section', None)
             password = hash_password(password)
-            print(password)
             if instructor_datastore.get_user(email) or admin_datastore.get_user(email) or student_datastore.get_user(email):
                 return make_response(jsonify({'error': 'Email already exists'}), 400)
             try:
@@ -53,6 +56,10 @@ def student_reg():
 
 @app_views.route('/student/auth/login', methods=['POST'], strict_slashes=False)
 def student_login():
+    """
+    function attempts to authenticate a student user based on the provided email and
+    password, setting a cookie with an access token upon successful login.
+    """
     try:
         # below line is for testing purpose
         request.form = request.get_json()
@@ -75,6 +82,10 @@ def student_login():
 @app_views.route('/student/update/<id>', methods=['PUT'], strict_slashes=False)
 @jwt_required()
 def student_update(id):
+    """
+    updates student information based on user type and input data,
+    handling different cases and error scenarios.
+    """
     try:
         user, user_type = get_current_user()
         if user.confirmed_at:
@@ -123,6 +134,10 @@ def student_update(id):
 @app_views.route('/student/delete/<id>', methods=['DELETE'], strict_slashes=False)
 @jwt_required()
 def student_del(id):
+    """
+    deletes a student user from the datastore if the current user is an admin
+    and the admin user has been confirmed.
+    """
     admin_user, user_type = get_current_user()
     if user_type == 'admin':
         student = student_datastore.find_user(id=id)
@@ -136,7 +151,7 @@ def student_del(id):
 
 
 
-@app_views.route('/student/<rf_id>', methods=['GET'], strict_slashes=False)
+@app_views.route('/student/rfid/<rf_id>', methods=['GET'], strict_slashes=False)
 def student_check_rf_id(rf_id):
     student = student_datastore.find_user(rf_id=rf_id)
     if not student:
@@ -151,7 +166,7 @@ def student_check_rf_id(rf_id):
                         'RFID_verification': True}), 200
 
 
-@app_views.route('/student/<finger_id>', methods=['GET'], strict_slashes=False)
+@app_views.route('/student/fingerid/<finger_id>', methods=['GET'], strict_slashes=False)
 def student_check_finger_id(finger_id):
     student = student_datastore.find_user(finger_id=finger_id)
     if not student:
