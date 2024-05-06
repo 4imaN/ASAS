@@ -43,6 +43,6 @@ class AssignedStudent(BaseModel, db.Model):
     batch: Mapped[str] = mapped_column(String(10), nullable=False)
     section: Mapped[str] = mapped_column(String(10), nullable=False)
 
-    students = relationship('Student', secondary=assign_students, backref='students', cascade="all")
-    instructors = relationship('Instructor', secondary=assign_instructors, backref='instructors', cascade="all")
-    courses = relationship('Course', secondary=assign_courses, backref='courses', cascade='all')
+    students = relationship('Student', secondary=assign_students, backref='students')
+    instructors = relationship('Instructor', secondary=assign_instructors, backref='instructors')
+    courses = relationship('Course', secondary=assign_courses, backref='courses')
