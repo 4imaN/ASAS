@@ -2,6 +2,9 @@
 from models.basemodel import BaseModel
 from models import db
 from datetime import datetime
+from typing import List
+from models.instructor_session import InstAttendance
+from models.student_attendance import StuAttendance
 from sqlalchemy import (
                         String,
                         ForeignKey,
@@ -15,6 +18,8 @@ from sqlalchemy.orm import (
                             mapped_column,
                             relationship
                             )
+
+
 assign_students = Table('assigned_students',
                         BaseModel.metadata,
                         Column('student_id', String(60), ForeignKey('students.id')),

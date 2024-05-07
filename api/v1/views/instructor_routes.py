@@ -1,8 +1,9 @@
 
 from models import db, instructor_datastore, \
     admin_datastore, student_datastore, AssignedStudent, Course, \
-    Instructor, Student
+    Instructor, Student, Booked, Room, InstAttendance, StuAttendance
 from flask import jsonify, request, make_response
+from datetime import datetime, timedelta
 from sqlalchemy.exc import OperationalError, IntegrityError, SQLAlchemyError
 from flask_security import auth_required, login_user, logout_user, \
     roles_required, current_user, roles_accepted
@@ -428,4 +429,92 @@ def delete_class(id):
         db.session.commit()
         return make_response(jsonify({'deleted': True}), 200)
     except ValueError as e:
+        return make_response(jsonify({'error': str(e)}), 400)
+
+
+@app_views.route('/instructor/auth/create-session', methods=['POST'], strict_slashes=False)
+@jwt_required()
+def create_class_session():
+    instructor_user, user_type = get_current_user()
+    if user_type != 'instructor':
+        return make_response(jsonify({'error': 'URL doesnt exist'}), 404)
+    # testing purpose
+    request.form = request.get_json()
+    room_id = request.form.get('room_id', None)
+    course_id = request.form.get('course_id', None)
+    student_list = request.form.get('student_list', None)
+    if not Room.query.filter_by(id=id).first():
+        return make_response(jsonify({'error': 'No room found'}), 400)
+    start_time = request.form.get('start_time', None)
+    try:
+        start_time = int(start_time)
+    except (ValueError, TypeError):
+        return make_response(jsonify({'error': 'time must be Integer'}), 400)
+    try:
+        # check if a room is already occupied
+        is_booked = Booked.query.filter_by(id=id).first()
+        if is_booked and not is_booked.over:
+            return make_response(jsonify({'error': f'book already occupied at {is_booked.created_at}'}), 400)
+
+        # check if instructor already occupied a room
+        already_sessions = InstAttendance.query.filter_by(instructor_id=instructor_user.id).all()
+        for instructor_session in already_sessions:
+            if not instructor_session.end_time:
+                return make_response(jsonify(
+                    {'error': f'Instructor already have a session created at {instructor_session.start_time} \
+                     if you wish to create new session remove previous session'}), 400)
+        # check if the students is registered for the course and instructor
+        student_in_course = False
+        student_of_instructor = False
+        i = 0
+        for s_id in student_list:
+            student_class = AssignedStudent.query.join(Student,
+                                                       AssignedStudent.students).filter(Student.id == s_id['id'])
+            for instructor, course in zip(student_class.instructors, student_class.courses):
+                if student_in_course and student_of_instructor:
+                    break
+                if instructor['id'] == instructor_user.id:
+                    student_of_instructor = True
+                if course['id'] == course_id:
+                    student_in_course = True
+            if not student_of_instructor:
+                del student_list[i]
+                i += 1
+                continue
+            if not student_in_course:
+                del student_list[i]
+                i += 1
+                continue
+            i += 1
+        # starting to create session with start_time
+        # need to configure celery or other async op manager
+        start_time = datetime.now() + timedelta(minutes=start_time)
+        instructor_session = InstAttendance(instructor_id=instructor_user.id,
+                                            course_id=course_id,
+                                            room_id=room_id,
+                                            start_time=start_time)
+        for student in student_list:
+            stu_attende = StuAttendance(session_id=instructor_session.id,
+                                        course_id=course_id,
+                                        student_id=student['id'],
+                                        instructor_id=instructor_user.id,
+                                        room_id=room_id,
+                                        start_time=start_time)
+            db.session.add(stu_attende)
+            db.session.commit()
+            instructor_session.student_attendance.append(stu_attende)
+        booked_room = Booked(instructor_id=instructor_user.id,
+                             room_id=room_id)
+        db.session.add(instructor_session)
+        db.session.add(booked_room)
+        db.session.commit()
+        response = {}
+        response['session'] = {
+            'instructor_id': instructor_session.instructor_id,
+            'course_id': instructor_session.course_id,
+            'room_id': instructor_session.room_id,
+            'students':[{'id': student.student_id} for student in list(instructor_session.student_attendance)]
+        }
+        return make_response(jsonify(response), 201)
+    except Exception as e:
         return make_response(jsonify({'error': str(e)}), 400)
