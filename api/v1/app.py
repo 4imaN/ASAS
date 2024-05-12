@@ -10,32 +10,26 @@ from flask_jwt_extended import get_current_user, jwt_required, verify_jwt_in_req
 
 
 CORS(app, resources={r"/*": {"origins": "0.0.0.0"}})
+
+
+@app_views.route('/', methods=['GET', 'POST'], strict_slashes=False)
+def home():
+    return '''
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Automated Security and Attendance System</title>
+            </head>
+            <body>
+                <h1>Welcome to our Automated Security and Attendance System!</h1>
+                <p>Simplify your security and attendance management effortlessly.</p>
+                </body>
+            </html>
+           '''
+
 app.register_blueprint(app_views)
-
-
-# @app.before_request
-# def check_user():
-#     try:
-#         verify_jwt_in_request(locations=['headers'])
-#         user, user_type = get_current_user()
-#         print(session)
-#     #     if user_type == 'admin':
-#     #         print(0)
-#     #         security = Security(app, datastore=admin_datastore,
-#     #                           register_blueprint=False)
-#     #     elif user_type == 'instructor':
-#     #         print(1)
-#     #         security.init_app(app, datastore=instructor_datastore,
-#     #                           register_blueprint=False)
-#     #     elif user_type == 'student':
-#     #         print(2)
-#     #         security.init_app(app, datastore=student_datastore,
-#     #                           register_blueprint=False)
-#     except Exception as e:
-#         print(e)
-#         return
-#     pass
-
 
 @app.teardown_appcontext
 def tear_down_db(exc):
