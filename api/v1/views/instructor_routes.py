@@ -10,7 +10,10 @@ from flask_security import auth_required, login_user, logout_user, \
 from flask_security.utils import hash_password, verify_password
 from flask_jwt_extended import get_current_user, jwt_required, unset_access_cookies, create_access_token
 from utils.mailer import Mailer
+from requests import get
 from api.v1.views import app_views
+from utils.schedules import delete_records
+import time
 
 
 @app_views.route('/instructor/auth/register', methods=['POST'], strict_slashes=False)
@@ -288,7 +291,7 @@ def assign_instructor():
                 instructors=[{'id': instructor.id} for instructor in created_class.instructors],
                 courses=[{'id': course.id} for course in created_class.courses])
             return make_response(jsonify(response), 200)
-        except Exception as e:
+        except ValueError as e:
             return make_response(jsonify({'error': str(e)}), 400)
     return make_response(jsonify({'error': 'URL doesnt exist'}), 404)
 
@@ -443,9 +446,9 @@ def create_class_session():
     room_id = request.form.get('room_id', None)
     course_id = request.form.get('course_id', None)
     student_list = request.form.get('student_list', None)
-    if not Room.query.filter_by(id=id).first():
-        return make_response(jsonify({'error': 'No room found'}), 400)
     start_time = request.form.get('start_time', None)
+    if not Room.query.filter_by(id=room_id).first():
+        return make_response(jsonify({'error': 'No room found'}), 400)
     try:
         start_time = int(start_time)
     except (ValueError, TypeError):
@@ -461,21 +464,20 @@ def create_class_session():
         for instructor_session in already_sessions:
             if not instructor_session.end_time:
                 return make_response(jsonify(
-                    {'error': f'Instructor already have a session created at {instructor_session.start_time} \
-                     if you wish to create new session remove previous session'}), 400)
+                    {'error': f'Instructor already have a session created at {instructor_session.start_time} if you wish to create new session remove previous session'}), 400)
         # check if the students is registered for the course and instructor
         student_in_course = False
         student_of_instructor = False
         i = 0
         for s_id in student_list:
             student_class = AssignedStudent.query.join(Student,
-                                                       AssignedStudent.students).filter(Student.id == s_id['id'])
+                                                       AssignedStudent.students).filter(Student.id == s_id['id']).first()
             for instructor, course in zip(student_class.instructors, student_class.courses):
                 if student_in_course and student_of_instructor:
                     break
-                if instructor['id'] == instructor_user.id:
+                if instructor.id == instructor_user.id:
                     student_of_instructor = True
-                if course['id'] == course_id:
+                if course.id == course_id:
                     student_in_course = True
             if not student_of_instructor:
                 del student_list[i]
@@ -493,6 +495,8 @@ def create_class_session():
                                             course_id=course_id,
                                             room_id=room_id,
                                             start_time=start_time)
+        db.session.add(instructor_session)
+        db.session.commit()
         for student in student_list:
             stu_attende = StuAttendance(session_id=instructor_session.id,
                                         course_id=course_id,
@@ -515,6 +519,45 @@ def create_class_session():
             'room_id': instructor_session.room_id,
             'students':[{'id': student.student_id} for student in list(instructor_session.student_attendance)]
         }
+        my_time = start_time - timedelta(minutes=10)
+        print(f"start = {start_time}, my_time = {my_time}")
+        delete_records.apply_async(args=(start_time, instructor_session.id), eta=my_time)
         return make_response(jsonify(response), 201)
+    except ValueError as e:
+        return make_response(jsonify({'error': str(e)}), 400)
+
+
+@app_views.route('/instructor/verify-session/<session_id>', methods=['PUT'], strict_slashes=False)
+@jwt_required()
+def verify_session(session_id):
+    instructor, user_type = get_current_user()
+    if user_type != 'instructor':
+        return make_response(jsonify({'error': 'URL doesnt exist'}), 404)
+    session = InstAttendance.query.filter_by(id=session_id).first()
+    if not session:
+        return make_response(jsonify({'error': 'No class session found'}), 400)
+    uri = 'http://localhost:5000/api'
+    # test
+    request.form = request.get_json()
+    finger_id = request.form.get('finger_id', None)
+    rf_id = request.form.get('rf_id', None)
+    verified = False
+    data = None
+    try:
+        if finger_id:
+            data = get(f'{uri}/instructor/fingerid/{finger_id}').json
+            if data['verified']:
+                if data['instructor_id'] == session.instructor_id:
+                    session.verified = True
+                    verified = True
+                    return make_response(jsonify({'verified': True}), 200)
+        if rf_id:
+            data = get(f'{uri}/instructor/rfid/{rf_id}').json
+            if data['verified']:
+                if data['instructor_id'] == session.instructor_id:
+                    session.verified = True
+                    verified = True
+                    return make_response(jsonify({'verified': True}), 200)
+        return make_response(jsonify({'verified': False}), 400)
     except Exception as e:
         return make_response(jsonify({'error': str(e)}), 400)

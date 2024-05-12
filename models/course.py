@@ -4,8 +4,7 @@
 from models.basemodel import BaseModel
 from models import db
 from models.assigned_students import assign_courses
-from sqlalchemy import String
-from typing import List
+from sqlalchemy import String, ForeignKey
 from sqlalchemy.orm import (
                             Mapped,
                             mapped_column,
@@ -25,6 +24,6 @@ class Course(BaseModel, db.Model):
     course_credit: Mapped[str] = mapped_column(String(60), nullable=False)
     course_category: Mapped[str] = mapped_column(String(60), default='Common', nullable=False)
     course_department: Mapped[str] = mapped_column(String(60), nullable=False)
-
+    # instructor_id: Mapped[str] = mapped_column(String(60), ForeignKey('instructors.id'), nullable=False)
 
     # course_outline path
