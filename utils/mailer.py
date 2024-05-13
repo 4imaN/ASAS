@@ -21,7 +21,6 @@ app.config['MAIL_USE_SSL']=False
 # app.config['MAIL_DEBUG'] = True
 
 mail = Mail(app)
-print(getenv('PRODUCTION_URI'))
 
 class Mailer:
     uri = getenv('PRODUCTION_URI')
@@ -62,7 +61,7 @@ class Mailer:
                     </html>
 
                     '''
-            print(self.__body)
+
     def send_mail(self):
         msg = Message(subject=self.__subject,
                       sender='Noreply@attendance.com',
