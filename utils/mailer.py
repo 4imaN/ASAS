@@ -21,7 +21,7 @@ app.config['MAIL_USE_SSL']=False
 # app.config['MAIL_DEBUG'] = True
 
 mail = Mail(app)
-
+print(getenv('PRODUCTION_URI'))
 
 class Mailer:
     uri = getenv('PRODUCTION_URI')
