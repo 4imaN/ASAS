@@ -62,6 +62,7 @@ class Mailer:
                     </html>
 
                     '''
+            print(self.__body)
     def send_mail(self):
         msg = Message(subject=self.__subject,
                       sender='Noreply@attendance.com',
