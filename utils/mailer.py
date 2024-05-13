@@ -24,7 +24,7 @@ mail = Mail(app)
 
 
 class Mailer:
-    uri = 'http://localhost:5000/api/v1/auth/verify-email/'
+    uri = getenv('PRODUCTION_URI')
     def __init__(self, recipient, subject='Verify Email') -> None:
         if not isinstance(subject, str):
             raise TypeError('subject must be string')
