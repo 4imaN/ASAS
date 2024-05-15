@@ -380,6 +380,7 @@ def get_classes():
     batch = request.args.get('batch', None)
     section = request.args.get('section', None)
     course_id = request.args.get('course_id', None)
+    year = request.args.get('year', None)
     page = request.args.get('page', None)
 
     try:
@@ -388,6 +389,8 @@ def get_classes():
             created_class = created_class.filter(AssignedStudent.batch == str(batch))
         if id is not None:
             created_class = created_class.filter(AssignedStudent.id == id)
+        if year is not None:
+            created_class = created_class.filter(AssignedStudent.year == year)
         if section is not None:
             created_class = created_class.filter(AssignedStudent.section == section)
         if instructor_id is not None:
