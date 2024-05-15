@@ -292,9 +292,34 @@ def assign_instructor():
                 'section': created_class.section
                 }
             response.update(
-                students=[{'id': student.id} for student in created_class.students],
-                instructors=[{'id': instructor.id} for instructor in created_class.instructors],
-                courses=[{'id': course.id} for course in created_class.courses])
+                students=[{'id': student.id,
+                           'first_name': student.first_name,
+                           'middle_name': student.middle_name,
+                           'last_name': student.last_name,
+                           'email': student.email,
+                           'gender': student.gender,
+                           'department': student.department,
+                           'batch': str(student.batch_section).split(" ")[0],
+                           'section': str(student.batch_section).split(" ")[1]} for student in created_class.students],
+                instructors=[{'id': instructor.id,
+                            'first_name': instructor.first_name,
+                           'middle_name': instructor.middle_name,
+                           'last_name': instructor.last_name,
+                           'email': instructor.email,
+                           'qualification': instructor.qualification,
+                           'courses': [{'id': course.id,
+                                        'name': course.course_name,
+                                        'credit': course.course_credit,
+                                        'category': course.course_category,
+                                        'course_department': course.course_department,
+                                        'course_code': course.course_code} for course in instructor.courses],
+                           'department': instructor.department,} for instructor in created_class.instructors],
+                courses=[{'id': course.id,
+                          'name': course.course_name,
+                          'credit': course.course_credit,
+                          'category': course.course_category,
+                          'course_department': course.course_department,
+                          'course_code': course.course_code} for course in created_class.courses])
             return make_response(jsonify(response), 200)
         except Exception as e:
             return make_response(jsonify({'error': str(e)}), 400)
@@ -355,10 +380,34 @@ def update_class(id):
                 'section': created_class.section
                 }
         response.update(
-                students=[{'id': student.id} for student in created_class.students],
-                instructors=[{'id': instructor.id} for instructor in created_class.instructors],
-                courses=[{'id': course.id} for course in created_class.courses],
-                updated=True)
+                students=[{'id': student.id,
+                           'first_name': student.first_name,
+                           'middle_name': student.middle_name,
+                           'last_name': student.last_name,
+                           'email': student.email,
+                           'gender': student.gender,
+                           'department': student.department,
+                           'batch': str(student.batch_section).split(" ")[0],
+                           'section': str(student.batch_section).split(" ")[1]} for student in created_class.students],
+                instructors=[{'id': instructor.id,
+                            'first_name': instructor.first_name,
+                           'middle_name': instructor.middle_name,
+                           'last_name': instructor.last_name,
+                           'email': instructor.email,
+                           'qualification': instructor.qualification,
+                           'courses': [{'id': course.id,
+                                        'name': course.course_name,
+                                        'credit': course.course_credit,
+                                        'category': course.course_category,
+                                        'course_department': course.course_department,
+                                        'course_code': course.course_code} for course in instructor.courses],
+                           'department': instructor.department,} for instructor in created_class.instructors],
+                courses=[{'id': course.id,
+                          'name': course.course_name,
+                          'credit': course.course_credit,
+                          'category': course.course_category,
+                          'course_department': course.course_department,
+                          'course_code': course.course_code} for course in created_class.courses], updated=True)
         return make_response(jsonify(response), 200)
     except Exception as e:
         return make_response(jsonify({'error': str(e), 'updated': False}), 400)
@@ -418,9 +467,34 @@ def get_classes():
                         'section': classes.section
                         }
             response.update(
-                        students=[{'id': student.id} for student in classes.students],
-                        instructors=[{'id': instructor.id} for instructor in classes.instructors],
-                        courses=[{'id': course.id} for course in classes.courses])
+                students=[{'id': student.id,
+                           'first_name': student.first_name,
+                           'middle_name': student.middle_name,
+                           'last_name': student.last_name,
+                           'email': student.email,
+                           'gender': student.gender,
+                           'department': student.department,
+                           'batch': str(student.batch_section).split(" ")[0],
+                           'section': str(student.batch_section).split(" ")[1]} for student in created_class.students],
+                instructors=[{'id': instructor.id,
+                            'first_name': instructor.first_name,
+                           'middle_name': instructor.middle_name,
+                           'last_name': instructor.last_name,
+                           'email': instructor.email,
+                           'qualification': instructor.qualification,
+                           'courses': [{'id': course.id,
+                                        'name': course.course_name,
+                                        'credit': course.course_credit,
+                                        'category': course.course_category,
+                                        'course_department': course.course_department,
+                                        'course_code': course.course_code} for course in instructor.courses],
+                           'department': instructor.department,} for instructor in created_class.instructors],
+                courses=[{'id': course.id,
+                          'name': course.course_name,
+                          'credit': course.course_credit,
+                          'category': course.course_category,
+                          'course_department': course.course_department,
+                          'course_code': course.course_code} for course in created_class.courses])
             responses.append(response)
         return make_response(jsonify(responses), 200)
     except Exception as e:
