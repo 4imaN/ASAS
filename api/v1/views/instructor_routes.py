@@ -194,6 +194,7 @@ def instructor_check_finger_id(finger_id):
                         'biometric_verification': True}), 200
 
 @app_views.route('/instructor/auth/logout', methods=['GET', 'POST'], strict_slashes=False)
+@jwt_required()
 def instructor_logout():
     """
     checks if the current user is an instructor, and if so, logs them
@@ -251,7 +252,7 @@ def assign_instructor():
         try:
             request.form = request.get_json()
             instructor_list = request.form.get('instructor_list', None)
-            courses = request.form.get('courses', None)
+            course_id = request.form.get('course_id', None)
             semister = request.form.get('semister', None)
             department = request.form.get('department', None)
             batch = request.form.get('batch', None)
@@ -270,12 +271,16 @@ def assign_instructor():
                                             batch=batch,
                                             department=department,
                                             section=section)
-            for course in courses:
-                created_class.courses.append(Course.query.filter_by(id=course['id']).first())
-            for instructor in instructor_list:
-                created_class.instructors.append(instructor_datastore.find_user(id=instructor['id']))
-            for student in student_list:
-                created_class.students.append(student_datastore.find_user(id=student['id']))
+            try:
+                for student in student_list:
+                    created_class.students.append(student_datastore.find_user(id=student['id']))
+                created_class.courses.append(Course.query.filter_by(id=course_id).first())
+                for instructor in instructor_list:
+                    created_class.instructors.append(instructor_datastore.find_user(id=instructor['id']))
+                    instructor_datastore.find_user(id=instructor['id']).courses.append(Course.query.filter_by(id=course_id).first())
+                    break
+            except Exception:
+                pass
             db.session.add(created_class)
             db.session.commit()
             response['class'] = {
@@ -291,7 +296,7 @@ def assign_instructor():
                 instructors=[{'id': instructor.id} for instructor in created_class.instructors],
                 courses=[{'id': course.id} for course in created_class.courses])
             return make_response(jsonify(response), 200)
-        except ValueError as e:
+        except Exception as e:
             return make_response(jsonify({'error': str(e)}), 400)
     return make_response(jsonify({'error': 'URL doesnt exist'}), 404)
 
@@ -313,7 +318,7 @@ def update_class(id):
     request.form = request.get_json()
     try:
         instructor_list = request.form.get('instructor_list', None)
-        courses = request.form.get('courses', None)
+        course_id = request.form.get('course_id', None)
         semister = request.form.get('semister', None)
         if semister is not None:
             created_class.semister = semister
@@ -329,10 +334,11 @@ def update_class(id):
         student_list = request.form.get('student_list', None)
 
         try:
-            for course in courses:
-                    created_class.courses.append(Course.query.filter_by(id=course['id']).first())
+            created_class.courses.append(Course.query.filter_by(id=course_id).first())
             for instructor in instructor_list:
                 created_class.instructors.append(instructor_datastore.find_user(id=instructor['id']))
+                instructor_datastore.find_user(id=instructor['id']).courses.append(Course.query.filter_by(id=course_id).first())
+                break
             for student in student_list:
                     created_class.students.append(student_datastore.find_user(id=student['id']))
         except Exception:
@@ -359,11 +365,15 @@ def update_class(id):
     
 
 @app_views.route('/instructor/get-class/', methods=['GET'], strict_slashes=False)
+@jwt_required()
 def get_classes():
     """
     This Python function retrieves classes based on various parameters
     such as ID, instructor ID, student ID, batch, section, and course ID.
     """
+    user, user_type = get_current_user()
+    if user_type != 'admin' or user_type != 'instructor':
+        return make_response(jsonify({'error': 'URL doesnt exist'}), 404)
     id = request.args.get('id', None)
     instructor_id = request.args.get('instructor_id', None)
     student_id = request.args.get('student_id', None)
@@ -451,6 +461,7 @@ def create_class_session():
         return make_response(jsonify({'error': 'No room found'}), 400)
     try:
         start_time = int(start_time)
+        minutes = start_time - 10
     except (ValueError, TypeError):
         return make_response(jsonify({'error': 'time must be Integer'}), 400)
     try:
@@ -489,7 +500,7 @@ def create_class_session():
                 continue
             i += 1
         # starting to create session with start_time
-        # need to configure celery or other async op manager
+        # need to configure celery
         start_time = datetime.now() + timedelta(minutes=start_time)
         instructor_session = InstAttendance(instructor_id=instructor_user.id,
                                             course_id=course_id,
@@ -519,11 +530,9 @@ def create_class_session():
             'room_id': instructor_session.room_id,
             'students':[{'id': student.student_id} for student in list(instructor_session.student_attendance)]
         }
-        my_time = start_time - timedelta(minutes=10)
-        print(f"start = {start_time}, my_time = {my_time}")
-        delete_records.apply_async(args=(start_time, instructor_session.id), eta=my_time)
+        delete_records.apply_async(args=(start_time, instructor_session.id), countdown=minutes*60)
         return make_response(jsonify(response), 201)
-    except ValueError as e:
+    except Exception as e:
         return make_response(jsonify({'error': str(e)}), 400)
 
 
@@ -533,7 +542,10 @@ def verify_session(session_id):
     instructor, user_type = get_current_user()
     if user_type != 'instructor':
         return make_response(jsonify({'error': 'URL doesnt exist'}), 404)
-    session = InstAttendance.query.filter_by(id=session_id).first()
+    try:
+        session = InstAttendance.query.filter_by(id=session_id).first()
+    except Exception:
+        return make_response(jsonify({'error': 'Session not found'}), 404)
     if not session:
         return make_response(jsonify({'error': 'No class session found'}), 400)
     uri = 'http://localhost:5000/api'
@@ -549,6 +561,7 @@ def verify_session(session_id):
             if data['verified']:
                 if data['instructor_id'] == session.instructor_id:
                     session.verified = True
+
                     verified = True
                     return make_response(jsonify({'verified': True}), 200)
         if rf_id:
@@ -557,7 +570,7 @@ def verify_session(session_id):
                 if data['instructor_id'] == session.instructor_id:
                     session.verified = True
                     verified = True
-                    return make_response(jsonify({'verified': True}), 200)
-        return make_response(jsonify({'verified': False}), 400)
+                    return make_response(jsonify({'verified': verified}), 200)
+        return make_response(jsonify({'verified': verified}), 400)
     except Exception as e:
         return make_response(jsonify({'error': str(e)}), 400)

@@ -9,6 +9,7 @@ from models.basemodel import BaseModel
 from models import db, admin
 from models.instructor_session import InstAttendance
 from models.assigned_students import assign_instructors
+from models.course import Course
 from models.booked_room import Booked
 from typing import List
 from flask_security import UserMixin
@@ -18,6 +19,11 @@ instructor_roles = Table('instructor_roles',
                     BaseModel.metadata,
                     Column('instructor_id', String(60), ForeignKey('instructors.id')),
                     Column('role_id', String(60), ForeignKey('roles.id')))
+
+instructor_courses = Table('instructor_courses',
+                            BaseModel.metadata,
+                            Column('instructor_id', String(60), ForeignKey('instructors.id')),
+                            Column('course_id', String(60), ForeignKey('courses.id')))
 
 
 
@@ -35,6 +41,7 @@ class Instructor(db.Model, UserMixin):
     rf_id: Mapped[str] = mapped_column(String(60), nullable=True)
     qualification: Mapped[str] = mapped_column(String(60), nullable=False)
     sessions: Mapped[List['InstAttendance']] = relationship('InstAttendance', back_populates='instructor', cascade='all')
+    courses: Mapped[List['Course']] = relationship('Course', secondary=instructor_courses, backref='instructors')
     booked_rooms: Mapped[List['Booked']] = relationship('Booked', back_populates='instructor', cascade='all')
     roles = relationship('Role', secondary=instructor_roles, backref='instructors')
 

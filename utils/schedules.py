@@ -31,7 +31,7 @@ def delete_records(start_time, id):
     except Exception as e:
         return e
 
-    if not session.verified and round(diff.total_seconds() / 60) >= 15:
+    if not session.verified:
         with app.app_context():
             db.session.delete(session)
             db.session.commit()

@@ -16,6 +16,7 @@ sender_email = getenv('EMAIL')
 sender_password = getenv('PASSWORD')
 app.config["MAIL_USERNAME"]=sender_email
 app.config['MAIL_PASSWORD']=sender_password
+app.config['MAIL_DEFAULT_SENDER']='noreply@attendance.com'
 app.config['MAIL_USE_TLS']=True
 app.config['MAIL_USE_SSL']=False
 # app.config['MAIL_DEBUG'] = True
@@ -64,7 +65,7 @@ class Mailer:
 
     def send_mail(self):
         msg = Message(subject=self.__subject,
-                      sender='Noreply@attendance.com',
+                      sender=('noreply', sender_email),
                       recipients=[self.__recipient])
         msg.html = self.__body
         mail.send(msg)

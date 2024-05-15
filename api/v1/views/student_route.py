@@ -182,6 +182,7 @@ def student_check_finger_id(finger_id):
 
 
 @app_views.route('/student/auth/logout', methods=['GET', 'POST'], strict_slashes=False)
+@jwt_required()
 def student_logout():
     student, user_type = get_current_user()
     if user_type == 'student':
