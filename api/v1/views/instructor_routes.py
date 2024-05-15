@@ -372,7 +372,7 @@ def get_classes():
     such as ID, instructor ID, student ID, batch, section, and course ID.
     """
     user, user_type = get_current_user()
-    if user_type != 'admin' or user_type != 'instructor':
+    if user_type not in ['admin', 'instructor']:
         return make_response(jsonify({'error': 'URL doesnt exist'}), 404)
     id = request.args.get('id', None)
     instructor_id = request.args.get('instructor_id', None)
