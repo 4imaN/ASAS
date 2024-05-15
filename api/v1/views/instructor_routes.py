@@ -638,15 +638,20 @@ def verify_session(session_id):
             if data['verified']:
                 if data['instructor_id'] == session.instructor_id:
                     session.verified = True
+                    db.session.add(session)
+                    db.session.commit()
 
                     verified = True
-                    return make_response(jsonify({'verified': True}), 200)
+                    return make_response(jsonify({'verified': verified}), 200)
         if rf_id:
             data = get(f'{uri}/instructor/rfid/{rf_id}').json
             if data['verified']:
                 if data['instructor_id'] == session.instructor_id:
                     session.verified = True
-                    verified = True
+                    db.session.add(session)
+                    db.session.commit()
+
+                    verified = True        
                     return make_response(jsonify({'verified': verified}), 200)
         return make_response(jsonify({'verified': verified}), 400)
     except Exception as e:
