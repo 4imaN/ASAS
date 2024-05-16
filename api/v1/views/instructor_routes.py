@@ -342,27 +342,25 @@ def update_class(id):
     # testing purpose
     request.form = request.get_json()
     try:
-        instructor_list = request.form.get('instructor_list', None)
+        instructor_id = request.form.get('instructor_id', None)
         course_id = request.form.get('course_id', None)
         semister = request.form.get('semister', None)
-        if semister is not None:
-            created_class.semister = semister
+        # if semister is not None:
+        #     created_class.semister = semister
         department = request.form.get('department', None)
-        if department is not None:
-            created_class.department = department
+        # if department is not None:
+        #     created_class.department = department
         batch = request.form.get('batch', None)
-        if batch is not None:
-            created_class.batch = batch
+        # if batch is not None:
+        #     created_class.batch = batch
         section = request.form.get('section', None)
-        if section is not None:
-            created_class.section = section
+        # if section is not None:
+        #     created_class.section = section
         student_list = request.form.get('student_list', None)
 
         try:
-            for instructor in instructor_list:
-                created_class.instructors.append(instructor_datastore.find_user(id=instructor['id']))
-                instructor_datastore.find_user(id=instructor['id']).courses.append(Course.query.filter_by(id=course_id).first())
-                break
+            created_class.instructors.append(instructor_datastore.find_user(id=instructor_id))
+            instructor_datastore.find_user(id=instructor_id).courses.append(Course.query.filter_by(id=course_id).first())
             created_class.courses.append(Course.query.filter_by(id=course_id).first())
             for student in student_list:
                     created_class.students.append(student_datastore.find_user(id=student['id']))

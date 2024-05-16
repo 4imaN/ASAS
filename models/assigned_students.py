@@ -31,7 +31,8 @@ assign_instructors = Table('assigned_instructors',
                            Column('instructor_id', String(60), ForeignKey('instructors.id')),
                            Column('assign_id', String(60), ForeignKey('assignations.id')),
                            Column('course_id', String(60), ForeignKey('courses.id')),
-                           UniqueConstraint('instructor_id', 'assign_id', 'course_id', name='unqiue_instructor_assign'))
+                        #    UniqueConstraint('instructor_id', 'assign_id', 'course_id', name='unqiue_instructor_assign')
+                        )
 
 assign_courses = Table('assigned_courses',
                        BaseModel.metadata,
