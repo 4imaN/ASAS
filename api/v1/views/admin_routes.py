@@ -218,5 +218,6 @@ def admin_me():
                                       'gender': admin.gender,
                                       'email': admin.email,
                                       'department': admin.department,
+                                      'id': admin.id
                                       }), 200)
     return make_response(jsonify({'error': 'url doesnt exist'}), 400)

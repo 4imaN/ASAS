@@ -213,7 +213,8 @@ def student_me():
                                       'email': student.email,
                                       'department': student.department,
                                       'batch': student.batch_section.split(" ")[0],
-                                      'section': student.batch_section.split(" ")[1]
+                                      'section': student.batch_section.split(" ")[1],
+                                      'id': student.id
                                       }), 200)
     return make_response(jsonify({'error': 'URL doesnt exist'}), 404)
 

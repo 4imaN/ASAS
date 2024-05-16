@@ -228,6 +228,7 @@ def instructor_me():
                                       'email': instructor.email,
                                       'department': instructor.department,
                                       'qualification': instructor.qualification,
+                                      'id': instructor.id
                                       }), 200)
     return make_response(jsonify({'error': 'URL doesnt exist'}), 404)
 
