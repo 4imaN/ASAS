@@ -107,7 +107,7 @@ def instructor_update(id):
                 data = request.get_json()
                 for k in data.keys():
                     if k not in updatables:
-                        return jsonify({'error': f'key {k} not updatable or not available'}), 400
+                        return make_response(jsonify({'error': f'key {k} not updatable or not available'}), 400)
                 for k, v in data.items():
                     if k == 'password':
                         v = hash_password(v)
@@ -359,11 +359,11 @@ def update_class(id):
         student_list = request.form.get('student_list', None)
 
         try:
-            created_class.courses.append(Course.query.filter_by(id=course_id).first())
             for instructor in instructor_list:
                 created_class.instructors.append(instructor_datastore.find_user(id=instructor['id']))
                 instructor_datastore.find_user(id=instructor['id']).courses.append(Course.query.filter_by(id=course_id).first())
                 break
+            created_class.courses.append(Course.query.filter_by(id=course_id).first())
             for student in student_list:
                     created_class.students.append(student_datastore.find_user(id=student['id']))
         except Exception:
@@ -615,7 +615,7 @@ def create_class_session():
 
 @app_views.route('/instructor/verify-session/<session_id>', methods=['PUT'], strict_slashes=False)
 @jwt_required()
-def verify_session(session_id):
+def verify_session_instructor(session_id):
     instructor, user_type = get_current_user()
     if user_type != 'instructor':
         return make_response(jsonify({'error': 'URL doesnt exist'}), 404)

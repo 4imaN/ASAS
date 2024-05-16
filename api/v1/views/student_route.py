@@ -1,5 +1,8 @@
 
-from models import app, instructor_datastore, admin_datastore, student_datastore
+from models import app, instructor_datastore, admin_datastore, \
+    student_datastore, InstAttendance, StuAttendance
+from models import db
+from datetime import datetime
 from flask import jsonify, abort, request, make_response
 from sqlalchemy.exc import OperationalError, IntegrityError, SQLAlchemyError
 from flask_security import auth_required, login_user, logout_user, \
@@ -8,6 +11,7 @@ from flask_security.utils import hash_password, verify_password
 from flask_jwt_extended import jwt_required, get_current_user ,unset_access_cookies, create_access_token
 from utils.mailer import Mailer
 from api.v1.views import app_views
+from requests import get
 
 
 @app_views.route('/student/auth/register', methods=['POST'], strict_slashes=False)
@@ -212,3 +216,54 @@ def student_me():
                                       'section': student.batch_section.split(" ")[1]
                                       }), 200)
     return make_response(jsonify({'error': 'URL doesnt exist'}), 404)
+
+
+@app_views.route('/student/verify-session/session-id', methods=['PUT'], strict_slashes=False)
+@jwt_required()
+def verify_session_student(session_id):
+    student, user_type = get_current_user()
+    if user_type != 'student':
+        return make_response(jsonify({'error': 'URL doesnt exist'}), 404)
+    session = InstAttendance.query.filter_by(id=session_id).first()
+    if not session:
+        return make_response(jsonify({'error': 'Session not found'}), 404)
+    student_attendance_obj_found = False
+    student_attendance = None
+    for student_att in session.student_attendance:
+        if student_att.student_id == student.id:
+            student_attendance_obj_found = True
+            student_attendance = student_att
+    if not student_attendance_obj_found:
+        return make_response(jsonify({'error': 'no student attendance created'}), 404)
+    # test
+    request.form = request.get_json()
+    finger_id = request.form.get('finger_id', None)
+    rf_id = request.form.get('rf_id', None)
+    verified = False
+    data = None
+    uri = 'http://localhost:5000/api'
+    try:
+        if finger_id:
+            data = get(f'{uri}/student/fingerid/{finger_id}').json
+            if data['verified']:
+                if data['student_id'] == student_attendance.student_id and not student_attendance.arrived_time:
+                    student_attendance.arrived_time = datetime.now()
+                    db.session.add(student_attendance)
+                    db.session.commit()
+
+                    verified = True
+                    return make_response(jsonify({'verified': verified}), 200)
+        if rf_id:
+            data = get(f'{uri}/student/rfid/{rf_id}').json
+            if data['verified']:
+                if data['student_id'] == student_attendance.student_id and student_attendance.arrived_time:
+                    student_attendance.arrived_time = datetime.now()
+                    db.session.add(student_attendance)
+                    db.session.commit()
+
+                    verified = True        
+                    return make_response(jsonify({'verified': verified}), 200)
+        return make_response(jsonify({'verified': verified}), 400)
+    except Exception as e:
+        return make_response(jsonify({'error': str(e)}), 400)
+
