@@ -473,7 +473,7 @@ def get_classes():
                            'gender': student.gender,
                            'department': student.department,
                            'batch': str(student.batch_section).split(" ")[0],
-                           'section': str(student.batch_section).split(" ")[1]} for student in created_class.students],
+                           'section': str(student.batch_section).split(" ")[1]} for student in classes.students],
                 instructors=[{'id': instructor.id,
                             'first_name': instructor.first_name,
                            'middle_name': instructor.middle_name,
@@ -486,13 +486,13 @@ def get_classes():
                                         'category': course.course_category,
                                         'course_department': course.course_department,
                                         'course_code': course.course_code} for course in instructor.courses],
-                           'department': instructor.department,} for instructor in created_class.instructors],
+                           'department': instructor.department,} for instructor in classes.instructors],
                 courses=[{'id': course.id,
                           'name': course.course_name,
                           'credit': course.course_credit,
                           'category': course.course_category,
                           'course_department': course.course_department,
-                          'course_code': course.course_code} for course in created_class.courses])
+                          'course_code': course.course_code} for course in classes.courses])
             responses.append(response)
         return make_response(jsonify(responses), 200)
     except Exception as e:
