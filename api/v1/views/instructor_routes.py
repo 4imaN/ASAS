@@ -233,6 +233,28 @@ def instructor_me():
     return make_response(jsonify({'error': 'URL doesnt exist'}), 404)
 
 
+@app_views.route('/instructor/my-course', methods=['GET'], strict_slashes=False)
+@jwt_required()
+def get_instructor_course():
+    instructor, user_type = get_current_user()
+    if user_type != 'instructor':
+        return make_response(jsonify({'error': 'URL doesnt exist'}), 404)
+    try:
+        courses = []
+        for course in instructor.courses:
+            courses.append({
+                'id': course.id,
+                'course_code': course.course_code,
+                'course_name': course.course_name,
+                'course_credit': course.course_credit,
+                'course_category': course.course_category,
+                'course_department': course.course_department
+            })
+        return make_response(jsonify(courses), 200)
+    except Exception as e:
+        return make_response(jsonify({'error': str(e)}), 400)
+
+
 # @app_views.route('/instructor/assign-student/')
 # to be done
 # assigning students to a course and instructor
