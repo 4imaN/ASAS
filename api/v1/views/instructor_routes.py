@@ -233,7 +233,7 @@ def instructor_me():
     return make_response(jsonify({'error': 'URL doesnt exist'}), 404)
 
 
-@app_views.route('/instructor/my-course', methods=['GET'], strict_slashes=False)
+@app_views.route('/instructor/my-courses', methods=['GET'], strict_slashes=False)
 @jwt_required()
 def get_instructor_course():
     instructor, user_type = get_current_user()
