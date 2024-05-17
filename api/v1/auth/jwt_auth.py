@@ -7,7 +7,7 @@ import redis
 
 
 
-ACCESS_EXPIRES = timedelta(hours=1)
+ACCESS_EXPIRES = timedelta(hours=3)
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = ACCESS_EXPIRES
 jwt = JWTManager(app)
 
