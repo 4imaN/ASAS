@@ -68,7 +68,7 @@ def update_room(id):
 def get_rooms():
     # test
     # request.form = request.get_json()
-    id = request.form.get('id', None)
+    id = request.args.get('id', None)
     block_no = request.args.get('block_no', None)
     room_no = request.args.get('room_no', None)
     try:

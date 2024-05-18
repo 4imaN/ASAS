@@ -274,7 +274,7 @@ def assign_instructor():
         # testing line
         try:
             request.form = request.get_json()
-            instructor_list = request.form.get('instructor_list', None)
+            instructor_id = request.form.get('instructor_id', None)
             course_id = request.form.get('course_id', None)
             semister = request.form.get('semister', None)
             department = request.form.get('department', None)
@@ -298,10 +298,8 @@ def assign_instructor():
                 for student in student_list:
                     created_class.students.append(student_datastore.find_user(id=student['id']))
                 created_class.courses.append(Course.query.filter_by(id=course_id).first())
-                for instructor in instructor_list:
-                    created_class.instructors.append(instructor_datastore.find_user(id=instructor['id']))
-                    instructor_datastore.find_user(id=instructor['id']).courses.append(Course.query.filter_by(id=course_id).first())
-                    break
+                created_class.instructors.append(instructor_datastore.find_user(id=instructor_id))
+                instructor_datastore.find_user(id=instructor_id).courses.append(Course.query.filter_by(id=course_id).first())
             except Exception:
                 pass
             db.session.add(created_class)
@@ -382,11 +380,17 @@ def update_class(id):
         student_list = request.form.get('student_list', None)
 
         try:
-            created_class.instructors.append(instructor_datastore.find_user(id=instructor_id))
-            instructor_datastore.find_user(id=instructor_id).courses.append(Course.query.filter_by(id=course_id).first())
-            created_class.courses.append(Course.query.filter_by(id=course_id).first())
+            class_instructor_id = [i.id for i in created_class.instructors]
+            if instructor_id not in class_instructor_id:
+                created_class.instructors.append(instructor_datastore.find_user(id=instructor_id))
+            class_course_id = [i.id for i in created_class.courses]
+            if course_id not in class_course_id:
+                instructor_datastore.find_user(id=instructor_id).courses.append(Course.query.filter_by(id=course_id).first())
+                created_class.courses.append(Course.query.filter_by(id=course_id).first())
             for student in student_list:
-                    created_class.students.append(student_datastore.find_user(id=student['id']))
+                    class_students_id = [i.id for i in created_class.students]
+                    if student.id not in class_students_id:
+                        created_class.students.append(student_datastore.find_user(id=student['id']))
         except Exception:
             pass
         db.session.add(created_class)
@@ -421,7 +425,7 @@ def update_class(id):
                                         'credit': course.course_credit,
                                         'category': course.course_category,
                                         'course_department': course.course_department,
-                                        'course_code': course.course_code} for course in instructor.courses],
+                                        'course_code': course.course_code} for course in instructor.courses if course.id in class_course_id],
                            'department': instructor.department,} for instructor in created_class.instructors],
                 courses=[{'id': course.id,
                           'name': course.course_name,
@@ -479,6 +483,7 @@ def get_classes():
         created_class = created_class.all()
         # print(created_class)
         for classes in created_class:
+            class_course_id = [i.id for i in classes.courses]
             response['class'] = {
                         'id': classes.id,
                         'year': classes.year,
@@ -508,7 +513,7 @@ def get_classes():
                                         'credit': course.course_credit,
                                         'category': course.course_category,
                                         'course_department': course.course_department,
-                                        'course_code': course.course_code} for course in instructor.courses],
+                                        'course_code': course.course_code} for course in instructor.courses if course.id in class_course_id],
                            'department': instructor.department,} for instructor in classes.instructors],
                 courses=[{'id': course.id,
                           'name': course.course_name,
@@ -518,7 +523,7 @@ def get_classes():
                           'course_code': course.course_code} for course in classes.courses])
             responses.append(response)
         return make_response(jsonify(responses), 200)
-    except Exception as e:
+    except ValueError as e:
         return make_response(jsonify({'error': str(e)}), 400)
 
 

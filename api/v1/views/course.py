@@ -79,7 +79,8 @@ def get_course_id(id):
     course = Course.query.filter_by(id=id).first()
     if not course:
         return make_response(jsonify({'error': 'course not found'}), 400)
-    return make_response(jsonify({'course_code': course.course_code,
+    return make_response(jsonify({'id': course.id,
+                                  'course_code': course.course_code,
                                   'course_name': course.course_name,
                                   'course_credit': course.course_credit,
                                   'course_department': course.course_department,
