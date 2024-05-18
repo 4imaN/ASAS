@@ -44,8 +44,8 @@ security = Security(app, datastore=admin_datastore)
 class NewView(ModelView):
     # flask admin panel
     def is_accessible(self):
-        return current_user.is_authenticated and current_user.has_role('admin')
-        # return True
+        # return current_user.is_authenticated and current_user.has_role('admin')
+        return True
 
 
 admin.add_view(NewView(Student, db.session))
@@ -55,5 +55,5 @@ admin.add_view(NewView(AssignedStudent, db.session))
 admin.add_view(NewView(Course, db.session))
 admin.add_view(NewView(StuAttendance, db.session))
 admin.add_view(NewView(Booked, db.session))
-admin.add_view(NewView(AdminUser, db.session))
+# admin.add_view(NewView(AdminUser, db.session))
 admin.add_view(NewView(InstAttendance, db.session))

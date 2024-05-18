@@ -1,5 +1,5 @@
 
-from models import db, Room
+from models import db, Room, Booked
 from flask import jsonify, request, make_response
 from datetime import datetime, timedelta
 from sqlalchemy.exc import OperationalError, IntegrityError, SQLAlchemyError
@@ -82,12 +82,13 @@ def get_rooms():
         if not room:
             return make_response(jsonify({'error': 'no room found'}), 404)
         room = room.all()
-        response = {"rooms": []}
+        booked_id = [i.id for i in Booked.query.all() if i.over == False]
+        response = []
         for r in room:
-            response['rooms'].append({
+            response.append({
                 'id': r.id,
-                'block_no': r.block_no,
-                'room_no': r.room_no
+                'room': r.block_no + ' ' + r.room_no,
+                'is_booked': True if r.id in booked_id else False
             })
         return make_response(jsonify(response), 200)
     except Exception as e:

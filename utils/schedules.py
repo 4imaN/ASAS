@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from celery import Celery
-from models import InstAttendance, db, app
+from models import InstAttendance, db, app, Booked
 
 app.config.update(
     CELERY_BROKER_URL='redis://localhost:6379',
