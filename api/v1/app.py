@@ -9,7 +9,7 @@ from flask_jwt_extended import get_current_user, jwt_required, verify_jwt_in_req
 
 
 
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app, resource={r"/*": {"origins": "0.0.0.0"}})
 
 
 @app_views.route('/', methods=['GET', 'POST'], strict_slashes=False)
