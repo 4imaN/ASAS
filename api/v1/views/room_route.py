@@ -67,10 +67,10 @@ def update_room(id):
 @app_views.route('/room/get', methods=['GET'], strict_slashes=False)
 def get_rooms():
     # test
-    request.form = request.get_json()
+    # request.form = request.get_json()
     id = request.form.get('id', None)
-    block_no = request.form.get('block_no', None)
-    room_no = request.form.get('room_no', None)
+    block_no = request.args.get('block_no', None)
+    room_no = request.args.get('room_no', None)
     try:
         room = Room.query
         if id:
