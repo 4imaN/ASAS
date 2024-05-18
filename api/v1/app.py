@@ -9,7 +9,7 @@ from flask_jwt_extended import get_current_user, jwt_required, verify_jwt_in_req
 
 
 
-CORS(app, resources={r"/*": {"origins": "0.0.0.0"}})
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 
 @app_views.route('/', methods=['GET', 'POST'], strict_slashes=False)
@@ -30,6 +30,7 @@ def home():
            '''
 
 app.register_blueprint(app_views)
+
 
 @app.teardown_appcontext
 def tear_down_db(exc):
