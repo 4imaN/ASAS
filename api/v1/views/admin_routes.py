@@ -19,6 +19,7 @@ from datetime import datetime
 
 
 @app_views.route('/admin/auth/register', methods=['GET', 'POST'], strict_slashes=False)
+@auth_required()
 @jwt_required()
 def admin_reg():
     user, user_type = get_current_user()

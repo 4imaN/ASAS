@@ -454,6 +454,7 @@ def get_classes():
     batch = request.args.get('batch', None)
     section = request.args.get('section', None)
     course_id = request.args.get('course_id', None)
+    department = request.args.get('department', None)
     year = request.args.get('year', None)
     page = request.args.get('page', None)
 
@@ -473,6 +474,8 @@ def get_classes():
         if student_id is not None:
             created_class = created_class.join(Student,
                                                AssignedStudent.students).filter(Student.id == student_id)
+        if department is not None:
+            created_class = created_class.filter(AssignedStudent.department == department)
         if course_id is not None:
             created_class = created_class.join(Course,
                                                AssignedStudent.courses).filter(Course.id == course_id)
@@ -523,7 +526,7 @@ def get_classes():
                           'course_code': course.course_code} for course in classes.courses])
             responses.append(response)
         return make_response(jsonify(responses), 200)
-    except ValueError as e:
+    except Exception as e:
         return make_response(jsonify({'error': str(e)}), 400)
 
 
@@ -682,3 +685,17 @@ def verify_session_instructor(session_id):
         return make_response(jsonify({'verified': verified}), 400)
     except Exception as e:
         return make_response(jsonify({'error': str(e)}), 400)
+
+
+@app_views.route('/instructor/auth/delete-session/', methods=['DELETE'], strict_slashes=False)
+@jwt_required()
+def delete_session():
+    instructor, user_type = get_current_user()
+    if user_type != 'instructor':
+        return make_response(jsonify({'error': 'URL doesnt exist'}), 404)
+    # test
+    request.form = request.get_json()
+    finger_id = request.form.get('finger_id', None)
+    rf_id = request.form.get('rf_id', None)
+    if finger_id:
+        pass
