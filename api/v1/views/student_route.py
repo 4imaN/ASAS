@@ -312,4 +312,17 @@ def get_my_attendance(course_id):
     student, user_type = get_current_user()
     if user_type != 'student':
         return make_response(jsonify({'error': 'URL doesnt exist'}), 404)
-    
+    course_attendance = StuAttendance.query.filter(StuAttendance.course_id == course_id)
+    course_attendance = course_attendance.filter(StuAttendance.student_id == student.id)
+    course_attendance = course_attendance.all()
+    response = []
+    for cour_att in course_attendance:
+        # cour_att.start_time = datetime.strptime(cour_att.start_time, "%Y-%m-%d %H:%M:%S")
+        # cour_att.end_time = datetime.strptime(cour_att.end_time, "%Y-%m-%d %H:%M:%S")
+        # cour_att.arrived_time = datetime.strptime(cour_att.arrived_time, "%Y-%m-%d %H:%M:%S")
+        response.append({
+            'class_date': f"{cour_att.start_time.day}/{cour_att.start_time.month}/{cour_att.start_time.year}",
+            'at': f"{cour_att.start_time.hour}:{cour_att.start_time.minute}",
+            'arrived_at': f"{cour_att.arrived_time.hour}:{cour_att.arrived_time.minute}"
+        })
+    return make_response(jsonify(response), 200)
