@@ -583,28 +583,28 @@ def create_class_session():
                 return make_response(jsonify(
                     {'error': f'Instructor already have a session created at {instructor_session.start_time} if you wish to create new session remove previous session'}), 400)
         # check if the students is registered for the course and instructor
-        student_in_course = False
-        student_of_instructor = False
-        i = 0
-        for s_id in student_list:
-            student_class = AssignedStudent.query.join(Student,
-                                                       AssignedStudent.students).filter(Student.id == s_id['id']).first()
-            for instructor, course in zip(student_class.instructors, student_class.courses):
-                if student_in_course and student_of_instructor:
-                    break
-                if instructor.id == instructor_user.id:
-                    student_of_instructor = True
-                if course.id == course_id:
-                    student_in_course = True
-            if not student_of_instructor:
-                del student_list[i]
-                i += 1
-                continue
-            if not student_in_course:
-                del student_list[i]
-                i += 1
-                continue
-            i += 1
+        # student_in_course = False
+        # student_of_instructor = False
+        # i = 0
+        # for s_id in student_list:
+        #     student_class = AssignedStudent.query.join(Student,
+        #                                                AssignedStudent.students).filter(Student.id == s_id['id']).first()
+        #     for instructor, course in zip(student_class.instructors, student_class.courses):
+        #         if student_in_course and student_of_instructor:
+        #             break
+        #         if instructor.id == instructor_user.id:
+        #             student_of_instructor = True
+        #         if course.id == course_id:
+        #             student_in_course = True
+        #     if not student_of_instructor:
+        #         del student_list[i]
+        #         i += 1
+        #         continue
+        #     if not student_in_course:
+        #         del student_list[i]
+        #         i += 1
+        #         continue
+        #     i += 1
         # starting to create session with start_time
         # need to configure celery
         start_time = datetime.now() + timedelta(minutes=start_time)
@@ -617,7 +617,7 @@ def create_class_session():
         for student in student_list:
             stu_attende = StuAttendance(session_id=instructor_session.id,
                                         course_id=course_id,
-                                        student_id=student['id'],
+                                        student_id=student,
                                         instructor_id=instructor_user.id,
                                         room_id=room_id,
                                         start_time=start_time)
