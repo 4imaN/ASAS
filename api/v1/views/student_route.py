@@ -291,8 +291,10 @@ def student_attendance_list(course_id):
                 if student.arrived_time:
                     available += 1
             student = student_datastore.find_user(id=student_id)
+            instructor_classes = InstAttendance.query.filter(InstAttendance.instructor_id == instructor.id)
+            instructor_classes = instructor_classes.filter(InstAttendance.course_id == course_id).all()
             response.append({
-                'total_class': len(student_list),
+                'total_class': len(instructor_classes),
                 'attended': available,
                 'first_name': student.first_name,
                 'last_name': student.last_name,
