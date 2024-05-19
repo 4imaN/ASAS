@@ -298,8 +298,18 @@ def student_attendance_list(course_id):
                 'last_name': student.last_name,
                 'middle_name': student.middle_name,
                 'email': student.email,
+                'student_id': student.student_id,
                 'id': student_id
             })
         return make_response(jsonify(response), 200)
     except Exception as e :
         return make_response(jsonify({'error': str(e)}), 400)
+
+
+@app_views.route('/student/my-attendance/<course_id>', methods=['GET'], strict_slashes=False)
+@jwt_required()
+def get_my_attendance(course_id):
+    student, user_type = get_current_user()
+    if user_type != 'student':
+        return make_response(jsonify({'error': 'URL doesnt exist'}), 404)
+    
