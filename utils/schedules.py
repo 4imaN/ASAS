@@ -33,8 +33,8 @@ def delete_records(start_time, id):
 
     if not session.verified:
         with app.app_context():
-            for stu_att in session.student_attendance:
-                db.session.delete(stu_att)
+            # for stu_att in session.student_attendance:
+            #     db.session.delete(stu_att)
             # db.session.commit()
             room_id = session.room_id
             room = Booked.query.filter(Booked.room_id == room_id)
