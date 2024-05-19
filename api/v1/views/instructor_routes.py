@@ -560,6 +560,7 @@ def create_class_session():
     # testing purpose
     request.form = request.get_json()
     room_id = request.form.get('room_id', None)
+    print(room_id)
     course_id = request.form.get('course_id', None)
     student_list = request.form.get('student_list', None)
     start_time = request.form.get('start_time', None)
