@@ -636,6 +636,7 @@ def create_class_session():
             'room_id': instructor_session.room_id,
             'students':[{'id': student.student_id} for student in list(instructor_session.student_attendance)]
         }
+        response['msg'] = True
         delete_records.apply_async(args=(start_time, instructor_session.id), countdown=minutes*60)
         return make_response(jsonify(response), 201)
     except Exception as e:
