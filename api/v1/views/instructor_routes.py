@@ -439,15 +439,15 @@ def update_class(id):
     
 
 @app_views.route('/instructor/get-class/', methods=['GET'], strict_slashes=False)
-@jwt_required()
+# @jwt_required()
 def get_classes():
     """
     This Python function retrieves classes based on various parameters
     such as ID, instructor ID, student ID, batch, section, and course ID.
     """
-    user, user_type = get_current_user()
-    if user_type not in ['admin', 'instructor']:
-        return make_response(jsonify({'error': 'URL doesnt exist'}), 404)
+    # user, user_type = get_current_user()
+    # if user_type not in ['admin', 'instructor']:
+    #     return make_response(jsonify({'error': 'URL doesnt exist'}), 404)
     id = request.args.get('id', None)
     instructor_id = request.args.get('instructor_id', None)
     student_id = request.args.get('student_id', None)
