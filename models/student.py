@@ -33,6 +33,7 @@ class Student(BaseModel, db.Model):
     finger_id: Mapped[str] = mapped_column(String(60), nullable=True)
     rf_id: Mapped[str] = mapped_column(String(60), nullable=True)
     add: Mapped[Boolean] = mapped_column(Boolean, default=False, nullable=False)
+    new: Mapped[Boolean] = mapped_column(Boolean, default=True, nullable=False)
     batch_section: Mapped[str] = mapped_column(String(60), nullable=False)
 
     student_attendance: Mapped[List['StuAttendance']] = relationship(back_populates='student')

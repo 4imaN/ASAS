@@ -1,5 +1,6 @@
 
-from sqlalchemy import String, Column, ForeignKey, Table, DateTime, Integer
+from sqlalchemy import String, Column, \
+    ForeignKey, Table, DateTime, Integer, Boolean
 from sqlalchemy.orm import (
                             Mapped,
                             mapped_column,
@@ -37,6 +38,7 @@ class Instructor(db.Model, UserMixin):
     email: Mapped[str] = mapped_column(String(60), unique=True)
     password: Mapped[str] = mapped_column(String(255), nullable=False)
     department: Mapped[str] = mapped_column(String(100), nullable=False)
+    new: Mapped[Boolean] = mapped_column(Boolean, default=True, nullable=False)
     finger_id: Mapped[str] = mapped_column(String(60), nullable=True)
     rf_id: Mapped[str] = mapped_column(String(60), nullable=True)
     qualification: Mapped[str] = mapped_column(String(60), nullable=False)

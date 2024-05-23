@@ -9,3 +9,4 @@ from api.v1.views.student_route import *
 from api.v1.auth.jwt_auth import *
 from api.v1.views.course import *
 from api.v1.views.room_route import *
+from api.v1.views.util_routes import *
