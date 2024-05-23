@@ -32,20 +32,23 @@ def delete_records(start_time, id):
         return e
 
     if not session.verified:
-        with app.app_context():
-            # for stu_att in session.student_attendance:
-            #     db.session.delete(stu_att)
-            # db.session.commit()
-            room_id = session.room_id
-            room = Booked.query.filter(Booked.room_id == room_id)
-            room = room.filter(Booked.over == False)
-            room.all()
-            room = room[0]
-            db.session.delete(room)
-            db.session.delete(session)
-            db.session.commit()
-            print('deleted')
-            return True
+        try:
+            with app.app_context():
+                # for stu_att in session.student_attendance:
+                #     db.session.delete(stu_att)
+                # db.session.commit()
+                room_id = session.room_id
+                room = Booked.query.filter(Booked.room_id == room_id)
+                room = room.filter(Booked.over == False)
+                room.all()
+                room = room[0]
+                db.session.delete(room)
+                db.session.delete(session)
+                db.session.commit()
+                print('deleted')
+                return True
+        except Exception:
+            pass
     print('not deleted')
     return False
     # print('delayed_task')

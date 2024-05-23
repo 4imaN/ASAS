@@ -702,7 +702,8 @@ def get_instructor_session():
             response['msg'] = True
             response['session'] = {'course_name': Course.query.filter_by(id=session.course_id).first().course_name,
                                    'room': Room.query.filter_by(id=session.room_id).first().block_no + " "  + Room.query.filter_by(id=session.room_id).first().room_no,
-                                   'start_time': F"{session.start_time.day}/{session.start_time.month}/{session.start_time.year} {session.start_time.hour}:{session.start_time.minute}"
+                                   'start_time': F"{session.start_time.day}/{session.start_time.month}/{session.start_time.year} {session.start_time.hour}:{session.start_time.minute}",
+                                   'instructor_id': instructor.id
                                    }
             return make_response(jsonify(response), 200)
     return make_response(jsonify({'msg': False}), 200)
