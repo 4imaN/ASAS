@@ -439,15 +439,15 @@ def update_class(id):
     
 
 @app_views.route('/instructor/get-class/', methods=['GET'], strict_slashes=False)
-@jwt_required()
+# @jwt_required()
 def get_classes():
     """
     This Python function retrieves classes based on various parameters
     such as ID, instructor ID, student ID, batch, section, and course ID.
     """
-    user, user_type = get_current_user()
-    if user_type not in ['admin', 'instructor']:
-        return make_response(jsonify({'error': 'URL doesnt exist'}), 404)
+    # user, user_type = get_current_user()
+    # if user_type not in ['admin', 'instructor']:
+    #     return make_response(jsonify({'error': 'URL doesnt exist'}), 404)
     id = request.args.get('id', None)
     instructor_id = request.args.get('instructor_id', None)
     student_id = request.args.get('student_id', None)
@@ -560,6 +560,7 @@ def create_class_session():
     # testing purpose
     request.form = request.get_json()
     room_id = request.form.get('room_id', None)
+    print(room_id)
     course_id = request.form.get('course_id', None)
     student_list = request.form.get('student_list', None)
     start_time = request.form.get('start_time', None)
@@ -583,28 +584,28 @@ def create_class_session():
                 return make_response(jsonify(
                     {'error': f'Instructor already have a session created at {instructor_session.start_time} if you wish to create new session remove previous session'}), 400)
         # check if the students is registered for the course and instructor
-        student_in_course = False
-        student_of_instructor = False
-        i = 0
-        for s_id in student_list:
-            student_class = AssignedStudent.query.join(Student,
-                                                       AssignedStudent.students).filter(Student.id == s_id['id']).first()
-            for instructor, course in zip(student_class.instructors, student_class.courses):
-                if student_in_course and student_of_instructor:
-                    break
-                if instructor.id == instructor_user.id:
-                    student_of_instructor = True
-                if course.id == course_id:
-                    student_in_course = True
-            if not student_of_instructor:
-                del student_list[i]
-                i += 1
-                continue
-            if not student_in_course:
-                del student_list[i]
-                i += 1
-                continue
-            i += 1
+        # student_in_course = False
+        # student_of_instructor = False
+        # i = 0
+        # for s_id in student_list:
+        #     student_class = AssignedStudent.query.join(Student,
+        #                                                AssignedStudent.students).filter(Student.id == s_id['id']).first()
+        #     for instructor, course in zip(student_class.instructors, student_class.courses):
+        #         if student_in_course and student_of_instructor:
+        #             break
+        #         if instructor.id == instructor_user.id:
+        #             student_of_instructor = True
+        #         if course.id == course_id:
+        #             student_in_course = True
+        #     if not student_of_instructor:
+        #         del student_list[i]
+        #         i += 1
+        #         continue
+        #     if not student_in_course:
+        #         del student_list[i]
+        #         i += 1
+        #         continue
+        #     i += 1
         # starting to create session with start_time
         # need to configure celery
         start_time = datetime.now() + timedelta(minutes=start_time)
@@ -617,7 +618,7 @@ def create_class_session():
         for student in student_list:
             stu_attende = StuAttendance(session_id=instructor_session.id,
                                         course_id=course_id,
-                                        student_id=student['id'],
+                                        student_id=student,
                                         instructor_id=instructor_user.id,
                                         room_id=room_id,
                                         start_time=start_time)
@@ -636,6 +637,7 @@ def create_class_session():
             'room_id': instructor_session.room_id,
             'students':[{'id': student.student_id} for student in list(instructor_session.student_attendance)]
         }
+        response['msg'] = True
         delete_records.apply_async(args=(start_time, instructor_session.id), countdown=minutes*60)
         return make_response(jsonify(response), 201)
     except Exception as e:

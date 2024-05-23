@@ -1,7 +1,6 @@
 
 from models import app, instructor_datastore, admin_datastore, \
-    student_datastore, InstAttendance, StuAttendance
-from models import db
+    student_datastore, InstAttendance, StuAttendance, db
 from datetime import datetime
 from flask import jsonify, abort, request, make_response
 from sqlalchemy.exc import OperationalError, IntegrityError, SQLAlchemyError
@@ -219,7 +218,7 @@ def student_me():
     return make_response(jsonify({'error': 'URL doesnt exist'}), 404)
 
 
-@app_views.route('/student/verify-session/session-id', methods=['PUT'], strict_slashes=False)
+@app_views.route('/student/verify-session/<session_id>', methods=['PUT'], strict_slashes=False)
 @jwt_required()
 def verify_session_student(session_id):
     student, user_type = get_current_user()
@@ -268,3 +267,64 @@ def verify_session_student(session_id):
     except Exception as e:
         return make_response(jsonify({'error': str(e)}), 400)
 
+
+@app_views.route('/student/attendance/<course_id>', methods=['GET'], strict_slashes=False)
+@jwt_required()
+def student_attendance_list(course_id):
+    instructor, user_type = get_current_user()
+    if user_type != 'instructor':
+        return make_response(jsonify({'error': 'URL doesnt exist'}), 404)
+    try:
+        attendance_list = StuAttendance.query.filter(StuAttendance.course_id == course_id)
+        attendance_list = attendance_list.filter(StuAttendance.instructor_id == instructor.id)
+        temp_attendance_list = attendance_list
+        attendance_list.all()
+        response = []
+        for student_attendance in attendance_list:
+            student_id = student_attendance.student_id
+            student_list = temp_attendance_list
+            student_list.filter(StuAttendance.student_id == student_id)
+            student_list.filter(StuAttendance.end_time != None)
+            student_list = student_list.all()
+            available = 0
+            for student in student_list:
+                if student.arrived_time:
+                    available += 1
+            student = student_datastore.find_user(id=student_id)
+            instructor_classes = InstAttendance.query.filter(InstAttendance.instructor_id == instructor.id)
+            instructor_classes = instructor_classes.filter(InstAttendance.course_id == course_id).all()
+            response.append({
+                'total_class': len(instructor_classes),
+                'attended': available,
+                'first_name': student.first_name,
+                'last_name': student.last_name,
+                'middle_name': student.middle_name,
+                'email': student.email,
+                'student_id': student.student_id,
+                'id': student_id
+            })
+        return make_response(jsonify(response), 200)
+    except Exception as e :
+        return make_response(jsonify({'error': str(e)}), 400)
+
+
+@app_views.route('/student/my-attendance/<course_id>', methods=['GET'], strict_slashes=False)
+@jwt_required()
+def get_my_attendance(course_id):
+    student, user_type = get_current_user()
+    if user_type != 'student':
+        return make_response(jsonify({'error': 'URL doesnt exist'}), 404)
+    course_attendance = StuAttendance.query.filter(StuAttendance.course_id == course_id)
+    course_attendance = course_attendance.filter(StuAttendance.student_id == student.id)
+    course_attendance = course_attendance.all()
+    response = []
+    for cour_att in course_attendance:
+        # cour_att.start_time = datetime.strptime(cour_att.start_time, "%Y-%m-%d %H:%M:%S")
+        # cour_att.end_time = datetime.strptime(cour_att.end_time, "%Y-%m-%d %H:%M:%S")
+        # cour_att.arrived_time = datetime.strptime(cour_att.arrived_time, "%Y-%m-%d %H:%M:%S")
+        response.append({
+            'class_date': f"{cour_att.start_time.day}/{cour_att.start_time.month}/{cour_att.start_time.year}",
+            'at': f"{cour_att.start_time.hour}:{cour_att.start_time.minute}",
+            'arrived_at': f"{cour_att.arrived_time.hour}:{cour_att.arrived_time.minute}"
+        })
+    return make_response(jsonify(response), 200)
