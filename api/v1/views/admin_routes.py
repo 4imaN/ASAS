@@ -22,7 +22,7 @@ from datetime import datetime
 # @auth_required()
 # @jwt_required()
 def admin_reg():
-    user, user_type = get_current_user()
+    # user, user_type = get_current_user()
     if request.method == 'POST': #and user_type == 'admin':
         # below line is for testing purpose
         request.form = request.get_json()
