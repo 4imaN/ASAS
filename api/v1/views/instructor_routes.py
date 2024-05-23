@@ -715,8 +715,24 @@ def delete_session():
     if user_type != 'instructor':
         return make_response(jsonify({'error': 'URL doesnt exist'}), 404)
     # test
-    request.form = request.get_json()
-    finger_id = request.form.get('finger_id', None)
-    rf_id = request.form.get('rf_id', None)
-    if finger_id:
-        pass
+    # request.form = request.get_json()
+    # finger_id = request.form.get('finger_id', None)
+    # rf_id = request.form.get('rf_id', None)
+    try:
+        sessions = InstAttendance.query.filter_by(instructor_id=instructor.id).all()
+        response = {}
+        for session in sessions:
+            if not session.verified:
+                # response['msg'] = True
+                response['session'] = {'course_name': Course.query.filter_by(id=session.course_id).first().course_name,
+                                    'room': Room.query.filter_by(id=session.room_id).first().block_no + " "  + Room.query.filter_by(id=session.room_id).first().room_no,
+                                    'start_time': F"{session.start_time.day}/{session.start_time.month}/{session.start_time.year} {session.start_time.hour}:{session.start_time.minute}",
+                                    'deleted': True
+                                    }
+                db.session.delete(session)
+                db.session.commit()
+                return make_response(jsonify(response), 200)
+        return make_response(jsonify({'deleted': False}), 200)
+    except Exception as e:
+        return make_response(jsonify({'error': str(e)}), 400)
+    
