@@ -22,7 +22,7 @@ def check_newly_added():
             return make_response(jsonify({'error': str(e), 'msg': False}))
 
 
-@app_views.route('/register/<finger_id>/<id>', methods=['PUT', 'POST'], strict_slashes=False)
+@app_views.route('/register/<finger_id>/<id>', methods=['PUT', 'POST', 'GET'], strict_slashes=False)
 def add_finger_id(finger_id, id):
     try:
         instructor = instructor_datastore.find_user(id=id)
