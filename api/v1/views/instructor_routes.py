@@ -565,6 +565,7 @@ def create_class_session():
     print(room_id)
     course_id = request.form.get('course_id', None)
     student_list = request.form.get('student_list', None)
+    print(f"student_list: {student_list}")
     start_time = request.form.get('start_time', None)
     if not Room.query.filter_by(id=room_id).first():
         return make_response(jsonify({'error': 'No room found'}), 400)
