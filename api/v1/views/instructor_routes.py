@@ -562,10 +562,8 @@ def create_class_session():
     # testing purpose
     request.form = request.get_json()
     room_id = request.form.get('room_id', None)
-    print(room_id)
     course_id = request.form.get('course_id', None)
     student_list = request.form.get('student_list', None)
-    print(f"student_list: {student_list}")
     start_time = request.form.get('start_time', None)
     if not Room.query.filter_by(id=room_id).first():
         return make_response(jsonify({'error': 'No room found'}), 400)
@@ -648,18 +646,18 @@ def create_class_session():
 
 
 @app_views.route('/instructor/verify-session/<session_id>', methods=['PUT'], strict_slashes=False)
-@jwt_required()
+# @jwt_required()
 def verify_session_instructor(session_id):
-    instructor, user_type = get_current_user()
-    if user_type != 'instructor':
-        return make_response(jsonify({'error': 'URL doesnt exist'}), 404)
+    # instructor, user_type = get_current_user()
+    # if user_type != 'instructor':
+    #     return make_response(jsonify({'error': 'URL doesnt exist'}), 404)
     try:
         session = InstAttendance.query.filter_by(id=session_id).first()
     except Exception:
         return make_response(jsonify({'error': 'Session not found'}), 404)
     if not session:
         return make_response(jsonify({'error': 'No class session found'}), 400)
-    uri = 'http://localhost:5000/api'
+    uri = 'http://localhost:5000/api/v1'
     # test
     request.form = request.get_json()
     finger_id = request.form.get('finger_id', None)

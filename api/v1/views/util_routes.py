@@ -1,7 +1,10 @@
 
 from api.v1.views import app_views
-from models import instructor_datastore, student_datastore
+from models import instructor_datastore, student_datastore, InstAttendance \
+                    , db, StuAttendance
 from flask import make_response, jsonify
+from requests import get
+from datetime import datetime
 
 
 
@@ -43,3 +46,44 @@ def add_finger_id(finger_id, id):
             return make_response(jsonify({'msg': True}), 200)
         except ValueError as e:
             return make_response(jsonify({'error': str(e)}))
+
+
+@app_views.route('/verify/session/<finger_id>', methods=['GET', 'POST'], strict_slashes=False)
+def verify_session(finger_id):
+    try:
+        uri = 'http://localhost:5000/api/v1'
+        instructor = get(f"{uri}/instructor/fingerid/{finger_id}").json
+        if instructor['verified']:
+            sessions = InstAttendance.query.filter_by(instructor_id=instructor['instructor_id']).all()
+            created_session = None
+            for session in sessions:
+                if not session.verified:
+                    created_session = session
+                    break
+            if created_session:
+                created_session.verified = True
+                db.session.add(created_session)
+                db.session.commit()
+                return make_response(jsonify({'msg': True}), 200)
+            else:
+                raise ValueError("")
+    except Exception as e:
+        try:
+            student = get(f"{uri}/student/fingerid/{finger_id}").json
+            if student['verified']:
+                classes = StuAttendance.query.filter_by(student_id=student['student_id']).all()
+                open_class = None
+                for clas in classes:
+                    if not clas.end_time:
+                        open_class = clas
+                        break
+                if open_class:
+                    open_class.arrived_time = datetime.now()
+                    db.session.add(open_class)
+                    db.session.commit()
+                    return make_response(jsonify({'msg': True}), 200)
+                else:
+                    raise ValueError("")
+        except Exception as e:
+            return make_response(jsonify({'error': str(e)}), 400)
+            

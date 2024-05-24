@@ -1,6 +1,6 @@
 
 from models import app, instructor_datastore, admin_datastore, \
-    student_datastore, InstAttendance, StuAttendance, db
+    student_datastore, InstAttendance, StuAttendance, db, Course, Room
 from datetime import datetime
 from flask import jsonify, abort, request, make_response
 from sqlalchemy.exc import OperationalError, IntegrityError, SQLAlchemyError
@@ -219,32 +219,33 @@ def student_me():
 
 
 @app_views.route('/student/verify-session/<session_id>', methods=['PUT'], strict_slashes=False)
-@jwt_required()
+# @jwt_required()
 def verify_session_student(session_id):
-    student, user_type = get_current_user()
-    if user_type != 'student':
-        return make_response(jsonify({'error': 'URL doesnt exist'}), 404)
+    # student, user_type = get_current_user()
+    # if user_type != 'student':
+    #     return make_response(jsonify({'error': 'URL doesnt exist'}), 404)
     session = InstAttendance.query.filter_by(id=session_id).first()
     if not session:
         return make_response(jsonify({'error': 'Session not found'}), 404)
-    student_attendance_obj_found = False
-    student_attendance = None
-    for student_att in session.student_attendance:
-        if student_att.student_id == student.id:
-            student_attendance_obj_found = True
-            student_attendance = student_att
-    if not student_attendance_obj_found:
-        return make_response(jsonify({'error': 'no student attendance created'}), 404)
+    
     # test
     request.form = request.get_json()
     finger_id = request.form.get('finger_id', None)
     rf_id = request.form.get('rf_id', None)
     verified = False
     data = None
-    uri = 'http://localhost:5000/api'
+    uri = 'http://localhost:5000/api/v1'
     try:
         if finger_id:
             data = get(f'{uri}/student/fingerid/{finger_id}').json
+            student_attendance_obj_found = False
+            student_attendance = None
+            for student_att in session.student_attendance:
+                if student_att.student_id == data['student_id']:
+                    student_attendance_obj_found = True
+                    student_attendance = student_att
+            if not student_attendance_obj_found:
+                return make_response(jsonify({'error': 'no student attendance created'}), 404)
             if data['verified']:
                 if data['student_id'] == student_attendance.student_id and not student_attendance.arrived_time:
                     student_attendance.arrived_time = datetime.now()
@@ -255,6 +256,15 @@ def verify_session_student(session_id):
                     return make_response(jsonify({'verified': verified}), 200)
         if rf_id:
             data = get(f'{uri}/student/rfid/{rf_id}').json
+            student_attendance_obj_found = False
+            student_attendance = None
+            for student_att in session.student_attendance:
+                if student_att.student_id == data['student_id']:
+                    student_attendance_obj_found = True
+                    student_attendance = student_att
+            if not student_attendance_obj_found:
+                return make_response(jsonify({'error': 'no student attendance created'}), 404)
+            
             if data['verified']:
                 if data['student_id'] == student_attendance.student_id and student_attendance.arrived_time:
                     student_attendance.arrived_time = datetime.now()
@@ -266,7 +276,7 @@ def verify_session_student(session_id):
         return make_response(jsonify({'verified': verified}), 400)
     except Exception as e:
         return make_response(jsonify({'error': str(e)}), 400)
-
+    
 
 @app_views.route('/student/attendance/<course_id>', methods=['GET'], strict_slashes=False)
 @jwt_required()
@@ -328,3 +338,24 @@ def get_my_attendance(course_id):
             'arrived_at': f"{cour_att.arrived_time.hour}:{cour_att.arrived_time.minute}"
         })
     return make_response(jsonify(response), 200)
+
+
+@app_views.route('/student/my-announcment/', methods=['GET'], strict_slashes=False)
+@jwt_required()
+def my_announcment():
+    student, user_type = get_current_user()
+    student_id = student.id
+    try:
+        student_attendance_list = StuAttendance.query.filter_by(student_id=student_id).first()
+        if not student_attendance_list or student_attendance_list == []:
+            return make_response(jsonify({'error': 'no attendance found'}), 404)
+        for attendance in student_attendance_list:
+            if not attendance.end_time:
+                return make_response(jsonify({'course': Course.query.filter_by(id=attendance.course_id).first().course_name,
+                                              'instructor': instructor_datastore.find_user(id=attendance.instructor_id).first_name,
+                                              'room': Room.query.filter_by(id=attendance.room_id).first().block_no + " " + Room.query.filter_by(id=attendance.room_id).first().room_no,
+                                              'start_time': f"{attendance.start_time.day}/{attendance.start_time.month}/{attendance.start_time.year} {attendance.start_time.hour}:{attendance.start_time.minute}",
+                                              'msg': True}), 200)
+        return make_response(jsonify({'200': 'no active class schedule'}), 200)
+    except Exception as e:
+        return make_response(jsonify({'error': str(e)}), 400)
