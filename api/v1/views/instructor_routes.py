@@ -297,9 +297,11 @@ def assign_instructor():
             try:
                 for student in student_list:
                     created_class.students.append(student_datastore.find_user(id=student['id']))
-                created_class.courses.append(Course.query.filter_by(id=course_id).first())
-                created_class.instructors.append(instructor_datastore.find_user(id=instructor_id))
-                instructor_datastore.find_user(id=instructor_id).courses.append(Course.query.filter_by(id=course_id).first())
+                if Course.query.filter_by(id=course_id).first():
+                    created_class.courses.append(Course.query.filter_by(id=course_id).first())
+                if instructor_datastore.find_user(id=instructor_id):
+                    created_class.instructors.append(instructor_datastore.find_user(id=instructor_id))
+                    instructor_datastore.find_user(id=instructor_id).courses.append(Course.query.filter_by(id=course_id).first())
             except Exception:
                 pass
             db.session.add(created_class)
