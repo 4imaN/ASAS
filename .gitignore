@@ -5,6 +5,7 @@ __pycache__/
 *.env
 asas_venv/
 setup_mysql_dev.sql
+setup_mysql.sql
 
 # C extensions
 *.so
