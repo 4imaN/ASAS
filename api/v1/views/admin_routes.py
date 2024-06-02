@@ -119,7 +119,7 @@ def admin_login():
             admin_datastore.commit()
             data = {'type': 'admin'}
             access_token = create_access_token(identity=admin_user.id, additional_claims=data)
-            res = make_response(jsonify({'msg': True}), 200)
+            res = make_response(jsonify({'msg': True, "access_token": access_token}), 200)  
             res.set_cookie('access_token_cookie', access_token)
             return res
         return jsonify({'error': 'either you supplied a bad email or password or your email is still not confirmed yet'}), 400
