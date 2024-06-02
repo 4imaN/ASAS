@@ -348,7 +348,8 @@ def my_announcment():
     try:
         student_attendance_list = StuAttendance.query.filter_by(student_id=student_id).all()
         if not student_attendance_list or student_attendance_list == []:
-            return make_response(jsonify({'error': 'no attendance found'}), 404)
+            return make_response(jsonify({'error': 'No attendance found',
+                                          'msg': False}), 200)
         for attendance in student_attendance_list:
             if not attendance.end_time:
                 return make_response(jsonify({'course': Course.query.filter_by(id=attendance.course_id).first().course_name,
