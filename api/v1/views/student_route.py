@@ -346,7 +346,7 @@ def my_announcment():
     student, user_type = get_current_user()
     student_id = student.id
     try:
-        student_attendance_list = StuAttendance.query.filter_by(student_id=student_id).first()
+        student_attendance_list = StuAttendance.query.filter_by(student_id=student_id).all()
         if not student_attendance_list or student_attendance_list == []:
             return make_response(jsonify({'error': 'no attendance found'}), 404)
         for attendance in student_attendance_list:
