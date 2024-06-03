@@ -52,7 +52,7 @@ def add_finger_id(finger_id, id):
 def verify_session(finger_id):
     try:
         uri = 'http://localhost:5000/api/v1'
-        instructor = get(f"{uri}/instructor/fingerid/{finger_id}").json
+        instructor = get(f"{uri}/instructor/fingerid/{finger_id}").json()
         if instructor['verified']:
             sessions = InstAttendance.query.filter_by(instructor_id=instructor['instructor_id']).all()
             created_session = None
@@ -69,7 +69,7 @@ def verify_session(finger_id):
                 raise ValueError("")
     except Exception as e:
         try:
-            student = get(f"{uri}/student/fingerid/{finger_id}").json
+            student = get(f"{uri}/student/fingerid/{finger_id}").json()
             if student['verified']:
                 classes = StuAttendance.query.filter_by(student_id=student['student_id']).all()
                 open_class = None
