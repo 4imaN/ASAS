@@ -335,7 +335,7 @@ def get_my_attendance(course_id):
         response.append({
             'class_date': f"{cour_att.start_time.day}/{cour_att.start_time.month}/{cour_att.start_time.year}",
             'at': f"{cour_att.start_time.hour}:{cour_att.start_time.minute}",
-            'arrived_at': f"{cour_att.arrived_time.hour}:{cour_att.arrived_time.minute}"
+            'arrived_at': f"{cour_att.arrived_time.hour}:{cour_att.arrived_time.minute}" if cour_att.arrived_time else "Didnt arrived yet"
         })
     return make_response(jsonify(response), 200)
 
