@@ -282,7 +282,7 @@ def verify_session_student(session_id):
 @jwt_required()
 def student_attendance_list(course_id):
     instructor, user_type = get_current_user()
-    if user_type != 'instructor':
+    if user_type != 'student':
         return make_response(jsonify({'error': 'URL doesnt exist'}), 404)
     try:
         attendance_list = StuAttendance.query.filter(StuAttendance.course_id == course_id)

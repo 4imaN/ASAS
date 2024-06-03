@@ -597,7 +597,7 @@ def create_class_session():
         #         if instructor.id == instructor_user.id:
         #             student_of_instructor = True
         #         if course.id == course_id:
-        #             student_in_course = True
+        #             student_in_course = Tru           e
         #     if not student_of_instructor:
         #         del student_list[i]
         #         i += 1
