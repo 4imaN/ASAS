@@ -53,6 +53,7 @@ def verify_session(finger_id):
     try:
         uri = 'http://localhost:5000/api/v1'
         instructor = get(f"{uri}/instructor/fingerid/{finger_id}").json()
+        print(instructor)
         if instructor['verified']:
             sessions = InstAttendance.query.filter_by(instructor_id=instructor['instructor_id']).all()
             created_session = None
@@ -66,7 +67,9 @@ def verify_session(finger_id):
                 db.session.commit()
                 return make_response(jsonify({'msg': True}), 200)
             else:
-                raise ValueError("")
+                return make_response(jsonify({'msg': False}), 200)
+        else:
+            return make_response(jsonify({'error': 'instructor not verified'}), 400)
     except Exception as e:
         try:
             student = get(f"{uri}/student/fingerid/{finger_id}").json()
@@ -83,7 +86,9 @@ def verify_session(finger_id):
                     db.session.commit()
                     return make_response(jsonify({'msg': True}), 200)
                 else:
-                    raise ValueError("")
+                    return make_response(jsonify({'msg': False}), 200)
+            else:
+                return make_response(jsonify({'error': 'student not verified'}), 400)
         except Exception as e:
             return make_response(jsonify({'error': str(e)}), 400)
             
