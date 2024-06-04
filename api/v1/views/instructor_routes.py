@@ -727,15 +727,22 @@ def check_instructor_class():
             pass
         sessions = InstAttendance.query.filter(InstAttendance.instructor_id == instructor.id)
         sessions = sessions.all()
-        response = {}
+        response = []
         for session in sessions:
             if session.verified and not session.end_time:
-                response['msg'] = True
-                response['session'] = {'course_name': Course.query.filter_by(id=session.course_id).first().course_name,
-                                   'room': Room.query.filter_by(id=session.room_id).first().block_no + " "  + Room.query.filter_by(id=session.room_id).first().room_no,
-                                   'start_time': F"{session.start_time.day}/{session.start_time.month}/{session.start_time.year} {session.start_time.hour}:{session.start_time.minute}",
-                                   'instructor_id': instructor.id
-                                   }
+                student_attendance = session.student_attendance
+                for stu_att in student_attendance:
+                    arrived_time = stu_att.arrived_time if student.arrived_time else "X"
+                    student = student_datastore.find_user(id=session.student_id)
+                    response.append({
+                        'arrived_time': arrived_time,
+                        'first_name': student.first_name,
+                        'last_name': student.last_name,
+                        'middle_name': student.middle_name,
+                        'email': student.email,
+                        'student_id': student.student_id,
+                        'id': student.id
+                    })
                 return make_response(jsonify(response), 200)
     except Exception as e:
         return make_response(jsonify({'error': str(e)}), 400)
