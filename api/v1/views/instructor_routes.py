@@ -732,7 +732,7 @@ def check_instructor_class():
             if session.verified and not session.end_time:
                 student_attendance = session.student_attendance
                 for stu_att in student_attendance:
-                    arrived_time = stu_att.arrived_time if student.arrived_time else "X"
+                    arrived_time = stu_att.arrived_time if stu_att.arrived_time else "X"
                     student = student_datastore.find_user(id=session.student_id)
                     response.append({
                         'arrived_time': arrived_time,
@@ -744,6 +744,7 @@ def check_instructor_class():
                         'id': student.id
                     })
                 return make_response(jsonify(response), 200)
+        return make_response(jsonify({'msg': False, "error": "no open session found"}), 200)
     except Exception as e:
         return make_response(jsonify({'error': str(e)}), 400)
 

@@ -91,4 +91,3 @@ def verify_session(finger_id):
                 return make_response(jsonify({'error': 'no student or instructor found', 'msg': False}), 400)
         except Exception as e:
             return make_response(jsonify({'error': str(e)}), 400)
-            
