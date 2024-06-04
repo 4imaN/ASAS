@@ -54,8 +54,8 @@ def verify_session(finger_id):
         uri = 'http://localhost:5000/api/v1'
         instructor = get(f"{uri}/instructor/fingerid/{finger_id}").json()
         print(instructor)
-        if instructor['verified']:
-            sessions = InstAttendance.query.filter_by(instructor_id=instructor['instructor_id']).all()
+        if instructor['verified'] and instructor['biometric_verification']:
+            sessions = InstAttendance.query.filter_by(instructor_id=instructor['id']).all()
             created_session = None
             for session in sessions:
                 if not session.verified:
@@ -67,14 +67,14 @@ def verify_session(finger_id):
                 db.session.commit()
                 return make_response(jsonify({'msg': True}), 200)
             else:
-                return make_response(jsonify({'msg': False}), 200)
+                return make_response(jsonify({'error': "No session found", 'msg': False}), 200)
         else:
-            return make_response(jsonify({'error': 'instructor not verified'}), 400)
+            raise ValueError("No instructor")
     except Exception as e:
         try:
             student = get(f"{uri}/student/fingerid/{finger_id}").json()
-            if student['verified']:
-                classes = StuAttendance.query.filter_by(student_id=student['student_id']).all()
+            if student['verified'] and student['biometric_verification']:
+                classes = StuAttendance.query.filter_by(student_id=student['id']).all()
                 open_class = None
                 for clas in classes:
                     if not clas.end_time:
@@ -86,9 +86,9 @@ def verify_session(finger_id):
                     db.session.commit()
                     return make_response(jsonify({'msg': True}), 200)
                 else:
-                    return make_response(jsonify({'msg': False}), 200)
+                    return make_response(jsonify({'error': "No class found", 'msg': False}), 200)
             else:
-                return make_response(jsonify({'error': 'student not verified'}), 400)
+                return make_response(jsonify({'error': 'no student or instructor found', 'msg': False}), 400)
         except Exception as e:
             return make_response(jsonify({'error': str(e)}), 400)
             
