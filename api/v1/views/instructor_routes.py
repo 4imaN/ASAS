@@ -733,7 +733,7 @@ def check_instructor_class():
                 student_attendance = session.student_attendance
                 for stu_att in student_attendance:
                     arrived_time = stu_att.arrived_time if stu_att.arrived_time else "X"
-                    student = student_datastore.find_user(id=session.student_id)
+                    student = student_datastore.find_user(id=stu_att.student_id)
                     response.append({
                         'arrived_time': arrived_time,
                         'first_name': student.first_name,
