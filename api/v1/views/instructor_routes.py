@@ -710,6 +710,37 @@ def get_instructor_session():
     return make_response(jsonify({'msg': False}), 200)
 
 
+@app_views.route("/instructor/in-class", methods=['GET'], strict_slashes=False)
+@jwt_required()
+def check_instructor_class():
+    instructor, user_type = get_current_user()
+    if user_type != 'instructor':
+        return make_response(jsonify({"error": "URL doesnt exist"}), 404)
+    try:
+        sessions = InstAttendance.query.filter(InstAttendance.instructor_id == instructor.id)
+        sessions = sessions.filter(InstAttendance.verified == False)
+        try:
+            sessions = sessions.all()[0]
+            if sessions:
+                return make_response(jsonify({'msg': False}), 200)
+        except Exception:
+            pass
+        sessions = InstAttendance.query.filter(InstAttendance.instructor_id == instructor.id)
+        sessions = sessions.all()
+        response = {}
+        for session in sessions:
+            if session.verified and not session.end_time:
+                response['msg'] = True
+                response['session'] = {'course_name': Course.query.filter_by(id=session.course_id).first().course_name,
+                                   'room': Room.query.filter_by(id=session.room_id).first().block_no + " "  + Room.query.filter_by(id=session.room_id).first().room_no,
+                                   'start_time': F"{session.start_time.day}/{session.start_time.month}/{session.start_time.year} {session.start_time.hour}:{session.start_time.minute}",
+                                   'instructor_id': instructor.id
+                                   }
+                return make_response(jsonify(response), 200)
+    except Exception as e:
+        return make_response(jsonify({'error': str(e)}), 400)
+
+
 @app_views.route('/instructor/auth/delete-session/', methods=['DELETE'], strict_slashes=False)
 @jwt_required()
 def delete_session():
