@@ -10,7 +10,7 @@ from flask_jwt_extended import get_current_user, jwt_required, verify_jwt_in_req
 
 
 CORS(app, origins=["http://localhost:5173",
-                   "https://test-cookie--finalyearaastu.netlify.app/"], supports_credentials=True)
+                   "https://test-cookie--finalyearaastu.netlify.app"], supports_credentials=True)
 
 
 @app_views.route('/', methods=['GET', 'POST'], strict_slashes=False)
