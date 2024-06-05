@@ -704,7 +704,7 @@ def get_instructor_session():
                 student_id = session.student_attendance[0].student_id
                 student_class = AssignedStudent.query
                 student_class = student_class.filter(AssignedStudent.year == datetime.now().year)
-                student_class = student_class.join(Student, AssignedStudent.students).filter(Student.id == student_id)
+                student_class = student_class.join(Student, AssignedStudent.students).filter(Student.id == student_id).first()
                 response['msg'] = True
                 response['session'] = {'course_name': Course.query.filter_by(id=session.course_id).first().course_name,
                                     'room': Room.query.filter_by(id=session.room_id).first().block_no + " "  + Room.query.filter_by(id=session.room_id).first().room_no,
@@ -718,7 +718,7 @@ def get_instructor_session():
                                     }
                 return make_response(jsonify(response), 200)
         return make_response(jsonify({'msg': False}), 200)
-    except ValueError as e:
+    except Exception as e:
         return make_response(jsonify({'error': str(e), 'msg': False}), 400)
 
 
