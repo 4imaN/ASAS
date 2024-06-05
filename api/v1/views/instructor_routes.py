@@ -693,21 +693,33 @@ def verify_session_instructor(session_id):
 @app_views.route('/instructor/get-session', methods=['GET'], strict_slashes=False)
 @jwt_required()
 def get_instructor_session():
-    instructor, user_type = get_current_user()
-    if user_type != 'instructor':
-        return make_response(jsonify({'error': 'URL doesnt exist'}), 404)
-    sessions = InstAttendance.query.filter_by(instructor_id=instructor.id).all()
-    response = {}
-    for session in sessions:
-        if not session.verified:
-            response['msg'] = True
-            response['session'] = {'course_name': Course.query.filter_by(id=session.course_id).first().course_name,
-                                   'room': Room.query.filter_by(id=session.room_id).first().block_no + " "  + Room.query.filter_by(id=session.room_id).first().room_no,
-                                   'start_time': F"{session.start_time.day}/{session.start_time.month}/{session.start_time.year} {session.start_time.hour}:{session.start_time.minute}",
-                                   'instructor_id': instructor.id
-                                   }
-            return make_response(jsonify(response), 200)
-    return make_response(jsonify({'msg': False}), 200)
+    try:
+        instructor, user_type = get_current_user()
+        if user_type != 'instructor':
+            return make_response(jsonify({'error': 'URL doesnt exist'}), 404)
+        sessions = InstAttendance.query.filter_by(instructor_id=instructor.id).all()
+        response = {}
+        for session in sessions:
+            if not session.verified:
+                student_id = session.student_attendance[0].student_id
+                student_class = AssignedStudent.query
+                student_class = student_class.filter(AssignedStudent.year == datetime.now().year)
+                student_class = student_class.join(Student, AssignedStudent.students).filter(Student.id == student_id)
+                response['msg'] = True
+                response['session'] = {'course_name': Course.query.filter_by(id=session.course_id).first().course_name,
+                                    'room': Room.query.filter_by(id=session.room_id).first().block_no + " "  + Room.query.filter_by(id=session.room_id).first().room_no,
+                                    'start_time': F"{session.start_time.day}/{session.start_time.month}/{session.start_time.year} {session.start_time.hour}:{session.start_time.minute}",
+                                    'instructor_id': instructor.id,
+                                    'department': student_class.year,
+                                    'academic_year': student_class.year,
+                                    'semister': student_class.semister,
+                                    'batch': student_class.batch,
+                                    'section': student_class.section
+                                    }
+                return make_response(jsonify(response), 200)
+        return make_response(jsonify({'msg': False}), 200)
+    except Exception as e:
+        return make_response(jsonify({'error': str(e), 'msg': False}), 400)
 
 
 @app_views.route("/instructor/in-class", methods=['GET'], strict_slashes=False)
