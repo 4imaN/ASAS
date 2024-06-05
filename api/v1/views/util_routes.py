@@ -102,16 +102,16 @@ def delete_session_from_esp(finger_id):
             session = session.filter(InstAttendance.end_time == None).first()
             if not session:
                 end_time = datetime.now()
-            #     session.end_time = end_time
-            #     stu_attendees = session.student_attendance
-            #     for stu_att in stu_attendees:
-            #         stu_att.end_time = end_time
-            #         db.session.add(stu_att)
-            #         db.session.commit()
-            #     db.session.add(session)
-            #     db.session.commit()
-                return make_response(jsonify({'msg': True, end_time: F"{end_time.hour}:{end_time.minute}"}))
-            # else:
+                session.end_time = end_time
+                stu_attendees = session.student_attendance
+                for stu_att in stu_attendees:
+                    stu_att.end_time = end_time
+                    db.session.add(stu_att)
+                    db.session.commit()
+                db.session.add(session)
+                db.session.commit()
+                return make_response(jsonify({'msg': True, 'end_time': F"{end_time.day}/{end_time.month}/{end_time.year} {end_time.hour}:{end_time.minute}"}))
+            else:
                 return make_response(jsonify({'msg': False}))
         else:
             return make_response(jsonify({'error': "no instructor found", 'msg': False}), 400)
