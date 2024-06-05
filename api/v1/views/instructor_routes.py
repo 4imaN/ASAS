@@ -718,7 +718,7 @@ def get_instructor_session():
                                     }
                 return make_response(jsonify(response), 200)
         return make_response(jsonify({'msg': False}), 200)
-    except Exception as e:
+    except ValueError as e:
         return make_response(jsonify({'error': str(e), 'msg': False}), 400)
 
 
