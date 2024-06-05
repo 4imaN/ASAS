@@ -100,7 +100,7 @@ def delete_session_from_esp(finger_id):
         if instructor['verified'] and instructor['biometric_verification']:
             session = InstAttendance.query.filter(InstAttendance.instructor_id == instructor['id'])
             session = session.filter(InstAttendance.end_time == None).first()
-            if not session:
+            if session:
                 end_time = datetime.now()
                 session.end_time = end_time
                 stu_attendees = session.student_attendance
