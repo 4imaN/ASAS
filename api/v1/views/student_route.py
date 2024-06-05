@@ -290,8 +290,12 @@ def student_attendance_list(course_id):
         temp_attendance_list = attendance_list
         attendance_list.all()
         response = []
+        checked_list = []
         for student_attendance in attendance_list:
             student_id = student_attendance.student_id
+            if student_id in checked_list:
+                continue
+            checked_list.append(student_id)
             student_list = temp_attendance_list
             student_list = student_list.filter(StuAttendance.student_id == student_id)
             # student_list = student_list.filter(StuAttendance.end_time != None)
