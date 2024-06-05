@@ -710,7 +710,7 @@ def get_instructor_session():
                                     'room': Room.query.filter_by(id=session.room_id).first().block_no + " "  + Room.query.filter_by(id=session.room_id).first().room_no,
                                     'start_time': F"{session.start_time.day}/{session.start_time.month}/{session.start_time.year} {session.start_time.hour}:{session.start_time.minute}",
                                     'instructor_id': instructor.id,
-                                    'department': student_class.year,
+                                    'department': student_class.department,
                                     'academic_year': student_class.year,
                                     'semister': student_class.semister,
                                     'batch': student_class.batch,
