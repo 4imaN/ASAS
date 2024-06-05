@@ -293,8 +293,8 @@ def student_attendance_list(course_id):
         for student_attendance in attendance_list:
             student_id = student_attendance.student_id
             student_list = temp_attendance_list
-            student_list.filter(StuAttendance.student_id == student_id)
-            student_list.filter(StuAttendance.end_time != None)
+            student_list = student_list.filter(StuAttendance.student_id == student_id)
+            # student_list = student_list.filter(StuAttendance.end_time != None)
             student_list = student_list.all()
             available = 0
             for student in student_list:

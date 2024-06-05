@@ -100,20 +100,20 @@ def delete_session_from_esp(finger_id):
         if instructor['verified'] and instructor['biometric_verification']:
             session = InstAttendance.query.filter(InstAttendance.instructor_id == instructor['id'])
             session = session.filter(InstAttendance.end_time == None).first()
-            if session:
+            if not session:
                 end_time = datetime.now()
-                session.end_time = end_time
-                stu_attendees = session.student_attendance
-                for stu_att in stu_attendees:
-                    stu_att.end_time = end_time
-                    db.session.add(stu_att)
-                    db.session.commit()
-                db.session.add(session)
-                db.session.commit()
+            #     session.end_time = end_time
+            #     stu_attendees = session.student_attendance
+            #     for stu_att in stu_attendees:
+            #         stu_att.end_time = end_time
+            #         db.session.add(stu_att)
+            #         db.session.commit()
+            #     db.session.add(session)
+            #     db.session.commit()
                 return make_response(jsonify({'msg': True, end_time: F"{end_time.hour}:{end_time.minute}"}))
-            else:
+            # else:
                 return make_response(jsonify({'msg': False}))
         else:
             return make_response(jsonify({'error': "no instructor found", 'msg': False}), 400)
-    except Exception as e:
+    except ValueError as e:
         return make_response(jsonify({'error': str(e), 'msg': False}), 400)
