@@ -700,7 +700,7 @@ def get_instructor_session():
         sessions = InstAttendance.query.filter_by(instructor_id=instructor.id).all()
         response = {}
         for session in sessions:
-            if not session.verified:
+            if not session.verified or (session.verified and not session.end_time):
                 student_id = session.student_attendance[0].student_id
                 student_class = AssignedStudent.query
                 student_class = student_class.filter(AssignedStudent.year == datetime.now().year)
