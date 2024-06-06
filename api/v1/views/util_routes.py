@@ -5,9 +5,14 @@ from models import instructor_datastore, student_datastore, InstAttendance \
 from flask import make_response, jsonify
 from requests import get
 from datetime import datetime
+import redis
+
+RedisConnection = redis.StrictRedis(
+    host='localhost', port=6379, db=1, decode_responses=True
+)
 
 
-finger_down = False
+RedisConnection.set("finger_down", "False")
 
 
 
@@ -124,10 +129,16 @@ def delete_session_from_esp(finger_id):
 
 @app_views.route("/finger/down", methods=['GET', 'PUT'], strict_slashes=False)
 def finger_is_down():
-    finger_down = True
-    return make_response(jsonify({'msg': finger_down}))
+    RedisConnection.set("finger_down", "True")
+    return make_response(jsonify({'msg': eval(RedisConnection.get("finger_down"))}))
+
+
+@app_views.route("/finger/up", methods=['GET', 'PUT'], strict_slashes=False)
+def finger_is_up():
+    RedisConnection.set("finger_down", "False")
+    return make_response(jsonify({'msg': eval(RedisConnection.get("finger_down"))}))
 
 
 @app_views.route("/check/down", methods=['GET'], strict_slashes=False)
 def check_if_finger_print_is_down():
-    return make_response(jsonify({'msg': finger_down}))
+    return make_response(jsonify({'msg': eval(RedisConnection.get("finger_down"))}))
