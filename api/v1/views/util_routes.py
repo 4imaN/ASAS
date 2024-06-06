@@ -100,7 +100,7 @@ def verify_session(finger_id):
             return make_response(jsonify({'error': str(e)}), 400)
 
 
-@app_views.route("/verify/session/rfid/<rf_id>", methods=['GET', 'PUT'], strict_slashe=False)
+@app_views.route("/verify/session/rfid/<rf_id>", methods=['GET', 'PUT'], strict_slashes=False)
 def verify_session_using_rfid(rf_id):
     try:
         uri = 'http://localhost:5000/api/v1'
