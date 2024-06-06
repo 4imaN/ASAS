@@ -100,6 +100,50 @@ def verify_session(finger_id):
             return make_response(jsonify({'error': str(e)}), 400)
 
 
+@app_views.route("/verify/session/rfid/<rf_id>", methods=['GET', 'PUT'], strict_slashe=False)
+def verify_session_using_rfid(rf_id):
+    try:
+        uri = 'http://localhost:5000/api/v1'
+        instructor = get(f"{uri}/instructor/rfid/{rf_id}").json()
+        if instructor['verified'] and instructor['RFID_verification']:
+            sessions = InstAttendance.query.filter_by(instructor_id=instructor['id']).all()
+            created_session = None
+            for session in sessions:
+                if not session.verified:
+                    created_session = session
+                    break
+            if created_session:
+                created_session.verified = True
+                db.session.add(created_session)
+                db.session.commit()
+                return make_response(jsonify({'msg': True}), 200)
+            else:
+                return make_response(jsonify({'error': "No session found", 'msg': False}), 200)
+        else:
+            raise ValueError("No instructor")
+    except Exception as e:
+        try:
+            student = get(f"{uri}/student/rfid/{rf_id}").json()
+            if student['verified'] and student['RFID_verification']:
+                classes = StuAttendance.query.filter_by(student_id=student['id']).all()
+                open_class = None
+                for clas in classes:
+                    if not clas.end_time:
+                        open_class = clas
+                        break
+                if open_class:
+                    open_class.arrived_time = datetime.now()
+                    db.session.add(open_class)
+                    db.session.commit()
+                    return make_response(jsonify({'msg': True}), 200)
+                else:
+                    return make_response(jsonify({'error': "No class found", 'msg': False}), 200)
+            else:
+                return make_response(jsonify({'error': 'either no student or instructor found or no email verification provided', 'msg': False}), 400)
+        except Exception as e:
+            return make_response(jsonify({'error': str(e)}), 400)
+
+
 @app_views.route("/end/session/<finger_id>", methods=['GET', 'PUT'], strict_slashes=False)
 def delete_session_from_esp(finger_id):
     try:

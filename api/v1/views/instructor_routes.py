@@ -164,6 +164,8 @@ def instructor_check_rf_id(rf_id):
     """
     instructor = instructor_datastore.find_user(rf_id=rf_id)
     if not instructor:
+        instructor = instructor_datastore.find_user(teacher_id=rf_id)
+    if not instructor:
         return jsonify({'verified': False}), 400
     elif instructor and not instructor.confirmed_at:
         return jsonify({'verified': False, 'id': instructor.id,

@@ -158,6 +158,8 @@ def student_del(id):
 def student_check_rf_id(rf_id):
     student = student_datastore.find_user(rf_id=rf_id)
     if not student:
+        student = student_datastore.find_user(student_id=rf_id)
+    if not student:
         return jsonify({'verified': False}), 400
     elif student and not student.confirmed_at:
         return jsonify({'verified': False, 'id': student.id,
