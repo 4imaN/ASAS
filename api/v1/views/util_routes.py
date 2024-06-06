@@ -7,6 +7,9 @@ from requests import get
 from datetime import datetime
 
 
+finger_down = False
+
+
 
 @app_views.route('/check/news', methods=['GET'], strict_slashes=False)
 def check_newly_added():
@@ -87,7 +90,7 @@ def verify_session(finger_id):
                 else:
                     return make_response(jsonify({'error': "No class found", 'msg': False}), 200)
             else:
-                return make_response(jsonify({'error': 'no student or instructor found', 'msg': False}), 400)
+                return make_response(jsonify({'error': 'either no student or instructor found or no email verification provided', 'msg': False}), 400)
         except Exception as e:
             return make_response(jsonify({'error': str(e)}), 400)
 
@@ -117,3 +120,14 @@ def delete_session_from_esp(finger_id):
             return make_response(jsonify({'error': "no instructor found", 'msg': False}), 400)
     except ValueError as e:
         return make_response(jsonify({'error': str(e), 'msg': False}), 400)
+
+
+@app_views.route("/finger/down", methods=['GET', 'PUT'], strict_slashes=False)
+def finger_is_down():
+    finger_down = True
+    return make_response(jsonify({'msg': finger_down}))
+
+
+@app_views.route("/check/down", methods=['GET'], strict_slashes=False)
+def check_if_finger_print_is_down():
+    return make_response(jsonify({'msg': finger_down}))
