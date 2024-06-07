@@ -88,9 +88,11 @@ def verify_session(finger_id):
                         open_class = clas
                         break
                 if open_class:
-                    open_class.arrived_time = str(datetime.now())
+                    open_class.arrived_time = datetime.now()
                     db.session.add(open_class)
                     db.session.commit()
+                    print(F"student id {open_class.student_id}")
+                    print(F"id {open_class.id}")
                     print(open_class.arrived_time)
                     return make_response(jsonify({'msg': True, 'type': 'student'}), 200)
                 else:
