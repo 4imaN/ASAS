@@ -132,7 +132,7 @@ def verify_session_using_rfid(rf_id):
                 classes = StuAttendance.query.filter_by(student_id=student['id']).all()
                 open_class = None
                 for clas in classes:
-                    if not clas.end_time and clas.arrived_time:
+                    if not clas.end_time and not clas.arrived_time:
                         open_class = clas
                         break
                 if open_class:
