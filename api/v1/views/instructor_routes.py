@@ -13,7 +13,7 @@ from utils.mailer import Mailer
 from requests import get
 from api.v1.views import app_views
 from utils.schedules import delete_records
-import time
+from api.v1.views.util_routes import RedisConnection as RedisConn
 
 
 @app_views.route('/instructor/auth/register', methods=['POST'], strict_slashes=False)
@@ -618,6 +618,7 @@ def create_class_session():
                                             start_time=start_time)
         db.session.add(instructor_session)
         db.session.commit()
+        RedisConn.set(instructor_session.id, "False")
         for student in student_list:
             stu_attende = StuAttendance(session_id=instructor_session.id,
                                         course_id=course_id,
@@ -761,6 +762,19 @@ def check_instructor_class():
         return make_response(jsonify({'msg': False, "error": "no open session found"}), 200)
     except Exception as e:
         return make_response(jsonify({'error': str(e)}), 400)
+
+@app_views.route("/activate/end/session/", methods=['GET', 'PUT'], strict_slashes=False)
+@jwt_required()
+def activate_delete_session():
+    instructor, user_type = get_current_user()
+    if user_type != 'instructor':
+        return make_response(jsonify({'error': 'URL doesnt exist'}), 404)
+    session = InstAttendance.query.filter(InstAttendance.instructor_id == instructor.id)
+    session = session.filter(InstAttendance.end_time == None).first()
+    if session:
+        RedisConn.set(session.id, "True")
+        return make_response(jsonify({'msg': eval(RedisConn.get(session.id))}))
+    return make_response(jsonify({'error': 'no session found', 'msg': False}))
 
 
 @app_views.route('/instructor/auth/delete-session/', methods=['DELETE'], strict_slashes=False)

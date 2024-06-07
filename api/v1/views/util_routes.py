@@ -147,6 +147,7 @@ def verify_session_using_rfid(rf_id):
             return make_response(jsonify({'error': str(e)}), 400)
 
 
+
 @app_views.route("/end/session/<finger_id>", methods=['GET', 'PUT'], strict_slashes=False)
 def delete_session_from_esp(finger_id):
     try:
@@ -155,7 +156,7 @@ def delete_session_from_esp(finger_id):
         if instructor['verified'] and instructor['biometric_verification']:
             session = InstAttendance.query.filter(InstAttendance.instructor_id == instructor['id'])
             session = session.filter(InstAttendance.end_time == None).first()
-            if session:
+            if session and eval(RedisConnection.get(session.id)):
                 end_time = datetime.now()
                 session.end_time = end_time
                 stu_attendees = session.student_attendance
