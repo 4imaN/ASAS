@@ -72,7 +72,8 @@ def verify_session(finger_id):
                 created_session.verified = True
                 db.session.add(created_session)
                 db.session.commit()
-                return make_response(jsonify({'msg': True, 'type': 'instructor'}), 200)
+                return make_response(jsonify({'msg': True, 'type': 'instructor',
+                                              'id': instructor.teacher_id}), 200)
             else:
                 return make_response(jsonify({'error': "No session found", 'msg': False}), 200)
         else:
@@ -94,7 +95,7 @@ def verify_session(finger_id):
                     print(F"student id {open_class.student_id}")
                     print(F"id {open_class.id}")
                     print(open_class.arrived_time)
-                    return make_response(jsonify({'msg': True, 'type': 'student'}), 200)
+                    return make_response(jsonify({'msg': True, 'type': 'student', 'id': student.student_id}), 200)
                 else:
                     return make_response(jsonify({'error': "No class found", 'msg': False}), 200)
             else:
@@ -131,7 +132,7 @@ def verify_session_using_rfid(rf_id):
                 classes = StuAttendance.query.filter_by(student_id=student['id']).all()
                 open_class = None
                 for clas in classes:
-                    if not clas.end_time:
+                    if not clas.end_time and clas.arrived_time:
                         open_class = clas
                         break
                 if open_class:
