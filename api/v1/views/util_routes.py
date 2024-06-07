@@ -1,7 +1,7 @@
 
 from api.v1.views import app_views
 from models import instructor_datastore, student_datastore, InstAttendance \
-                    , db, StuAttendance
+                    , db, StuAttendance, app
 from flask import make_response, jsonify
 from requests import get
 from datetime import datetime
@@ -88,9 +88,10 @@ def verify_session(finger_id):
                         open_class = clas
                         break
                 if open_class:
-                    open_class.arrived_time = datetime.now()
-                    db.session.add(open_class)
-                    db.session.commit()
+                    with app.app_context():
+                        open_class.arrived_time = datetime.now()
+                        db.session.add(open_class)
+                        db.session.commit()
                     print(open_class.arrived_time)
                     return make_response(jsonify({'msg': True, 'type': 'student'}), 200)
                 else:
