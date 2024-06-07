@@ -72,7 +72,7 @@ def verify_session(finger_id):
                 created_session.verified = True
                 db.session.add(created_session)
                 db.session.commit()
-                return make_response(jsonify({'msg': True}), 200)
+                return make_response(jsonify({'msg': True, 'type': 'instructor'}), 200)
             else:
                 return make_response(jsonify({'error': "No session found", 'msg': False}), 200)
         else:
@@ -91,7 +91,8 @@ def verify_session(finger_id):
                     open_class.arrived_time = datetime.now()
                     db.session.add(open_class)
                     db.session.commit()
-                    return make_response(jsonify({'msg': True}), 200)
+                    print(open_class.arrived_time)
+                    return make_response(jsonify({'msg': True, 'type': 'student'}), 200)
                 else:
                     return make_response(jsonify({'error': "No class found", 'msg': False}), 200)
             else:
