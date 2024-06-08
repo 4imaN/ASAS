@@ -793,11 +793,16 @@ def delete_session():
         for session in sessions:
             if not session.verified:
                 # response['msg'] = True
+                rooms = Booked.query.filter(Booked.room_id == session.room_id)
+                rooms = rooms.filter(Booked.over == False).all()
+                for room in rooms:
+                    room.over = True
                 response['session'] = {'course_name': Course.query.filter_by(id=session.course_id).first().course_name,
                                     'room': Room.query.filter_by(id=session.room_id).first().block_no + " "  + Room.query.filter_by(id=session.room_id).first().room_no,
                                     'start_time': F"{session.start_time.day}/{session.start_time.month}/{session.start_time.year} {session.start_time.hour}:{session.start_time.minute}",
                                     'deleted': True
                                     }
+                db.session.add_all(rooms)
                 db.session.delete(session)
                 db.session.commit()
                 return make_response(jsonify(response), 200)
