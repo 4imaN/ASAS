@@ -41,13 +41,15 @@ def instructor_reg():
             password = hash_password(password)
             if instructor_datastore.get_user(email) or admin_datastore.get_user(email) or student_datastore.get_user(email):
                 return make_response(jsonify({'error': 'Email already exists'}), 400)
+            rf_id = teacher_id.replace("/", "_")
             try:
                 instructor_role = instructor_datastore.find_or_create_role('instructor')
                 instructor = instructor_datastore.create_user(email=email, first_name=first_name,
                                                             middle_name=middle_name, last_name=last_name,
                                                             gender=gender, department=department,
                                                             password=password, teacher_id=teacher_id,
-                                                            qualification=qualification)
+                                                            qualification=qualification,
+                                                            rf_id=rf_id)
                 instructor_datastore.add_role_to_user(instructor, instructor_role)
                 instructor_datastore.commit()
                 email_verifier = Mailer(instructor.email)

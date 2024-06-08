@@ -1,6 +1,7 @@
 
 from models import app, instructor_datastore, admin_datastore, \
-    student_datastore, InstAttendance, StuAttendance, db, Course, Room
+    student_datastore, InstAttendance, StuAttendance, db, Course, Room, \
+    AssignedStudent, Student
 from datetime import datetime
 from flask import jsonify, abort, request, make_response
 from sqlalchemy.exc import OperationalError, IntegrityError, SQLAlchemyError
@@ -35,6 +36,7 @@ def student_reg():
             student_id = request.form.get('student_id', None)
             batch_section = request.form.get('batch_section', None)
             password = hash_password(password)
+            rf_id = student_id.replace("/", "_")
             if instructor_datastore.get_user(email) or admin_datastore.get_user(email) or student_datastore.get_user(email):
                 return make_response(jsonify({'error': 'Email already exists'}), 400)
             try:
@@ -43,7 +45,8 @@ def student_reg():
                                                             middle_name=middle_name, last_name=last_name,
                                                             gender=gender, department=department,
                                                             password=password, student_id=student_id,
-                                                            batch_section=batch_section)
+                                                            batch_section=batch_section,
+                                                            rf_id=rf_id)
                 student_datastore.add_role_to_user(student, student_role)
                 student_datastore.commit()
                 email_verifier = Mailer(student.email)
@@ -313,6 +316,8 @@ def student_attendance_list(course_id):
             student = student_datastore.find_user(id=student_id)
             instructor_classes = InstAttendance.query.filter(InstAttendance.instructor_id == instructor.id)
             instructor_classes = instructor_classes.filter(InstAttendance.course_id == course_id).all()
+            assigned_class = AssignedStudent.query.filter(AssignedStudent.year == datetime.now().year)
+            assigned_class = assigned_class.join(Student, AssignedStudent).filter(Student.id == student.id).first()
             response.append({
                 'total_class': len(instructor_classes),
                 'attended': available,
@@ -321,7 +326,9 @@ def student_attendance_list(course_id):
                 'middle_name': student.middle_name,
                 'email': student.email,
                 'student_id': student.student_id,
-                'id': student_id
+                'id': student_id,
+                'section': assigned_class.section,
+                'batch': assigned_class.batch
             })
         return make_response(jsonify(response), 200)
     except Exception as e :
