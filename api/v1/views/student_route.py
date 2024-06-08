@@ -317,7 +317,7 @@ def student_attendance_list(course_id):
             instructor_classes = InstAttendance.query.filter(InstAttendance.instructor_id == instructor.id)
             instructor_classes = instructor_classes.filter(InstAttendance.course_id == course_id).all()
             assigned_class = AssignedStudent.query.filter(AssignedStudent.year == datetime.now().year)
-            assigned_class = assigned_class.join(Student, AssignedStudent).filter(Student.id == student.id).first()
+            assigned_class = assigned_class.join(Student, AssignedStudent.students).filter(Student.id == student.id).first()
             response.append({
                 'total_class': len(instructor_classes),
                 'attended': available,
