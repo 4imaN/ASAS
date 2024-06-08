@@ -1,7 +1,7 @@
 
 from api.v1.views import app_views
 from models import instructor_datastore, student_datastore, InstAttendance \
-                    , db, StuAttendance, app
+                    , db, StuAttendance, app, Room, Booked
 from flask import make_response, jsonify
 from requests import get
 from datetime import datetime
@@ -149,7 +149,7 @@ def verify_session_using_rfid(rf_id):
 
 
 
-@app_views.route("/end/session/<finger_id>", methods=['GET', 'PUT'], strict_slashes=False)
+@app_views.route("/end/session/finger/<finger_id>", methods=['GET', 'PUT'], strict_slashes=False)
 def delete_session_from_esp(finger_id):
     try:
         uri = 'http://localhost:5000/api/v1'
@@ -160,11 +160,46 @@ def delete_session_from_esp(finger_id):
             if session and eval(RedisConnection.get(session.id)):
                 end_time = datetime.now()
                 session.end_time = end_time
+                rooms = Booked.query.filter(Booked.room_id == session.room_id)
+                rooms = rooms.filter(Booked.over == False).all()
+                for room in rooms:
+                    room.over = True
                 stu_attendees = session.student_attendance
                 for stu_att in stu_attendees:
                     stu_att.end_time = end_time
-                    db.session.add(stu_att)
-                    db.session.commit()
+                db.session.add_all(rooms)
+                db.session.add_all(stu_attendees)
+                db.session.add(session)
+                db.session.commit()
+                return make_response(jsonify({'msg': True, 'end_time': F"{end_time.day}/{end_time.month}/{end_time.year} {end_time.hour}:{end_time.minute}"}))
+            else:
+                return make_response(jsonify({'msg': False}))
+        else:
+            return make_response(jsonify({'error': "no instructor found", 'msg': False}), 400)
+    except ValueError as e:
+        return make_response(jsonify({'error': str(e), 'msg': False}), 400)
+
+
+@app_views.route("/end/session/rfid/<rf_id>", methods=['GET', 'PUT'], strict_slashes=False)
+def delete_session_from_esp_using_rfid(rf_id):
+    try:
+        uri = 'http://localhost:5000/api/v1'
+        instructor = get(f"{uri}/instructor/rfid/{rf_id}").json()
+        if instructor['verified'] and instructor['RFID_verification']:
+            session = InstAttendance.query.filter(InstAttendance.instructor_id == instructor['id'])
+            session = session.filter(InstAttendance.end_time == None).first()
+            if session and eval(RedisConnection.get(session.id)):
+                end_time = datetime.now()
+                session.end_time = end_time
+                rooms = Booked.query.filter(Booked.room_id == session.room_id)
+                rooms = rooms.filter(Booked.over == False).all()
+                for room in rooms:
+                    room.over = True
+                stu_attendees = session.student_attendance
+                for stu_att in stu_attendees:
+                    stu_att.end_time = end_time
+                db.session.add_all(rooms)
+                db.session.add_all(stu_attendees)
                 db.session.add(session)
                 db.session.commit()
                 return make_response(jsonify({'msg': True, 'end_time': F"{end_time.day}/{end_time.month}/{end_time.year} {end_time.hour}:{end_time.minute}"}))

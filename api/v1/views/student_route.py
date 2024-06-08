@@ -363,6 +363,6 @@ def my_announcment():
                                               'room': Room.query.filter_by(id=attendance.room_id).first().block_no + " " + Room.query.filter_by(id=attendance.room_id).first().room_no,
                                               'start_time': f"{attendance.start_time.day}/{attendance.start_time.month}/{attendance.start_time.year} {attendance.start_time.hour}:{attendance.start_time.minute}",
                                               'msg': True}), 200)
-        return make_response(jsonify({'200': 'no active class schedule'}), 200)
+        return make_response(jsonify({'error': 'no active class schedule', 'msg': False}), 200)
     except Exception as e:
-        return make_response(jsonify({'error': str(e)}), 400)
+        return make_response(jsonify({'error': str(e), 'msg': False}), 400)
