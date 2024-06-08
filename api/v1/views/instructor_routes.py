@@ -169,10 +169,12 @@ def instructor_check_rf_id(rf_id):
         return jsonify({'verified': False}), 400
     elif instructor and not instructor.confirmed_at:
         return jsonify({'verified': False, 'id': instructor.id,
+                        'instrutor_id': instructor.teacher_id,
                         'first_name': instructor.first_name,
                         'RFID_verification': True}), 200
     elif instructor and instructor.confirmed_at:
         return jsonify({'verified': True, 'id': instructor.id,
+                        'instrutor_id': instructor.teacher_id,
                         'first_name': instructor.first_name,
                         'RFID_verification': True}), 200
 
@@ -188,10 +190,12 @@ def instructor_check_finger_id(finger_id):
         return jsonify({'verified': False}), 400
     elif instructor and not instructor.confirmed_at:
         return jsonify({'verified': False, 'id': instructor.id,
+                        'instrutor_id': instructor.teacher_id,
                         'first_name': instructor.first_name,
                         'biometric_verification': True}), 200
     elif instructor and instructor.confirmed_at:
         return jsonify({'verified': True, 'id': instructor.id,
+                        'instrutor_id': instructor.teacher_id,
                         'first_name': instructor.first_name,
                         'biometric_verification': True}), 200
 

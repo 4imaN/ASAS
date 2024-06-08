@@ -73,7 +73,7 @@ def verify_session(finger_id):
                 db.session.add(created_session)
                 db.session.commit()
                 return make_response(jsonify({'msg': True, 'type': 'instructor',
-                                              'id': instructor.teacher_id}), 200)
+                                              'id': instructor["instructor_id"]}), 200)
             else:
                 return make_response(jsonify({'error': "No session found", 'msg': False}), 200)
         else:
@@ -95,7 +95,9 @@ def verify_session(finger_id):
                     print(F"student id {open_class.student_id}")
                     print(F"id {open_class.id}")
                     print(open_class.arrived_time)
-                    return make_response(jsonify({'msg': True, 'type': 'student', 'id': student.student_id}), 200)
+                    return make_response(jsonify({'msg': True,
+                                                  'type': 'student',
+                                                  'id': student["student_id"]}), 200)
                 else:
                     return make_response(jsonify({'error': "No class found", 'msg': False}), 200)
             else:
@@ -120,7 +122,8 @@ def verify_session_using_rfid(rf_id):
                 created_session.verified = True
                 db.session.add(created_session)
                 db.session.commit()
-                return make_response(jsonify({'msg': True}), 200)
+                return make_response(jsonify({'msg': True, 'type': 'instructor',
+                                              'id': instructor["instructor_id"]}), 200)
             else:
                 return make_response(jsonify({'error': "No session found", 'msg': False}), 200)
         else:
@@ -139,7 +142,9 @@ def verify_session_using_rfid(rf_id):
                     open_class.arrived_time = datetime.now()
                     db.session.add(open_class)
                     db.session.commit()
-                    return make_response(jsonify({'msg': True}), 200)
+                    return make_response(jsonify({'msg': True,
+                                                  'type': 'student',
+                                                  'id': student["student_id"]}), 200)
                 else:
                     return make_response(jsonify({'error': "No class found", 'msg': False}), 200)
             else:
