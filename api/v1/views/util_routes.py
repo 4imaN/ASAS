@@ -88,7 +88,8 @@ def verify_session(finger_id):
                     if not clas.end_time and not clas.arrived_time:
                         open_class = clas
                         break
-                if open_class:
+                session = InstAttendance.query.filter(InstAttendance.id == open_class.session_id).first()
+                if open_class and session.verified:
                     open_class.arrived_time = datetime.now()
                     db.session.add(open_class)
                     db.session.commit()
@@ -138,7 +139,8 @@ def verify_session_using_rfid(rf_id):
                     if not clas.end_time and not clas.arrived_time:
                         open_class = clas
                         break
-                if open_class:
+                session = InstAttendance.query.filter(InstAttendance.id == open_class.session_id).first()
+                if open_class and session.verified:
                     open_class.arrived_time = datetime.now()
                     db.session.add(open_class)
                     db.session.commit()
