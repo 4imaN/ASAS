@@ -381,3 +381,30 @@ def my_announcment():
         return make_response(jsonify({'error': 'no active class schedule', 'msg': False}), 200)
     except Exception as e:
         return make_response(jsonify({'error': str(e), 'msg': False}), 400)
+
+
+@app_views.route('/student/get/unlisted', methods=['GET'], strict_slashes=False)
+@jwt_required()
+def get_unlisted_students():
+    admin, user_type = get_current_user()
+    if user_type != 'admin':
+        return make_response(jsonify({'error': 'URL doesnt exist'}), 401)
+    try:
+        response = []
+        all_students = Student.query.all()
+        for student in all_students:
+            student_class = AssignedStudent.query.join(Student, AssignedStudent.students).filter(Student.id == student.id).first()
+            if not student_class:
+                response.append({
+                    'first_name': student.first_name,
+                    'middle_name': student.middle_name,
+                    'last_name': student.last_name,
+                    'email': student.email,
+                    'id': student.id
+                })
+            else:
+                continue
+            return make_response(jsonify(response), 200)
+    except Exception as e:
+        return make_response({'error': str(e)}, 400)
+    
