@@ -401,8 +401,8 @@ def get_unlisted_students():
             all_students = all_students.filter(Student.batch_section == f"{batch} {section}")
         all_students = all_students.filter().all()
         for student in all_students:
-            student_class = AssignedStudent.query.join(Student, AssignedStudent.students).filter(Student.id == student.id).all()
-            if not student_class or student_class != []:
+            student_classes = [i.id for i in AssignedStudent.students]
+            if student.id not in student_classes:
                 response.append({
                     'first_name': student.first_name,
                     'middle_name': student.middle_name,
