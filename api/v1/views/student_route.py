@@ -364,11 +364,15 @@ def my_announcment():
     student_id = student.id
     try:
         student_attendance_list = StuAttendance.query.filter_by(student_id=student_id).all()
+        student_class = AssignedStudent.query.join(Student, AssignedStudent.students).filter(Student.id == student_id)
+        student_class = student_class.filter(AssignedStudent.year == datetime.now().year).first()
+        student_course = student_class.courses
         if not student_attendance_list or student_attendance_list == []:
             return make_response(jsonify({'error': 'No attendance found',
                                           'msg': False}), 200)
         for attendance in student_attendance_list:
-            if not attendance.end_time:
+            course = Course.query.filter_by(id=attendance.course_id).first()
+            if not attendance.end_time and course in student_course:
                 return make_response(jsonify({'course': Course.query.filter_by(id=attendance.course_id).first().course_name,
                                               'instructor': instructor_datastore.find_user(id=attendance.instructor_id).first_name,
                                               'room': Room.query.filter_by(id=attendance.room_id).first().block_no + " " + Room.query.filter_by(id=attendance.room_id).first().room_no,
