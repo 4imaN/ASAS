@@ -408,7 +408,10 @@ def get_unlisted_students():
                     'middle_name': student.middle_name,
                     'last_name': student.last_name,
                     'email': student.email,
-                    'id': student.id
+                    'id': student.id,
+                    'department': student.department,
+                    'section': student.batch_section.split(" ")[1],
+                    'batch': student.batch_section.split(" ")[0]
                 })
             else:
                 continue
