@@ -241,6 +241,40 @@ def instructor_me():
     return make_response(jsonify({'error': 'URL doesnt exist'}), 404)
 
 
+@app_views.route('/instructor/get-all', methods=['GET'], strict_slashes=False)
+@jwt_required()
+def get_all_instructors():
+    instructor, user_type = get_current_user()
+    if user_type != 'instructor':
+        return make_response(jsonify({'error': 'URL doesnt exist'}), 404)
+    try:
+        instructors = Instructor.query
+        department = request.args.get('department', None)
+        qualification = request.args.get('qualification', None)
+        if department:
+            instructors = instructors.filter(Instructor.department == department)
+        if qualification:
+            instructors = instructors.filter(Instructor.qualification == qualification)
+        instructors = instructors.all()
+        response = []
+        for instructor in instructors:
+            response.append({
+            'first_name': instructor.first_name,
+            'middle_name': instructor.middle_name,
+            'last_name': instructor.last_name,
+            'email': instructor.email,
+            'qualification': instructor.qualification,
+            'teacher_id': instructor.teacher_id,
+            'courses': [{'name': i.course_name,
+                         'credit': i.course_credit,
+                         'code': i.course_code} for i in instructor.courses],
+            'department': instructor.department,
+            })
+        return make_response(jsonify(response), 200)
+    except Exception as e:
+        return make_response(jsonify({'error': str(e)}))
+
+
 @app_views.route('/instructor/my-courses', methods=['GET'], strict_slashes=False)
 @jwt_required()
 def get_instructor_course():
