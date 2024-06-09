@@ -87,6 +87,30 @@ def get_course_id(id):
                                   'course_category': course.course_category}), 200)
 
 
+@app_views.route('/course/get-all', methods=['GET'], strict_slashes=False)
+def get_all_courses():
+    try:
+        courses = Course.query
+        department = request.args.get('department', None)
+        credit = request.args.get('credit', None)
+        if department:
+            courses = courses.filter(Course.course_department == department)
+        if credit:
+            courses = courses.filter(Course.course_credit == credit)
+        courses = courses.all()
+        response = []
+        for course in courses:
+                response.append({'id': course.id,
+                                  'course_code': course.course_code,
+                                  'course_name': course.course_name,
+                                  'course_credit': course.course_credit,
+                                  'course_department': course.course_department,
+                                  'course_category': course.course_category})
+        return make_response(jsonify(response), 200)
+    except Exception as e:
+        return make_response(jsonify({'error': str(e)}), 400)
+
+
 @app_views.route('/course/getdep/<department>', methods=['GET'], strict_slashes=False)
 def get_course_dep(department):
     """

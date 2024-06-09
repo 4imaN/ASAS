@@ -244,8 +244,8 @@ def instructor_me():
 @app_views.route('/instructor/get-all', methods=['GET'], strict_slashes=False)
 @jwt_required()
 def get_all_instructors():
-    instructor, user_type = get_current_user()
-    if user_type != 'instructor':
+    admin, user_type = get_current_user()
+    if user_type != 'admin':
         return make_response(jsonify({'error': 'URL doesnt exist'}), 404)
     try:
         instructors = Instructor.query
