@@ -363,7 +363,7 @@ def assign_instructor():
                                             section=section)
             try:
                 for student in student_list:
-                    created_class.students.append(student_datastore.find_user(id=student['id']))
+                    created_class.students.append(student_datastore.find_user(id=student))
                 if Course.query.filter_by(id=course_id).first():
                     created_class.courses.append(Course.query.filter_by(id=course_id).first())
                 if instructor_datastore.find_user(id=instructor_id):
