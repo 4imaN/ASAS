@@ -313,12 +313,11 @@ def attach_course():
     request.form = request.get_json()
     instructor_id = request.form.get("instructor_id", None)
     course_id = request.form.get("course_id", None)
-    instructor = instructor_datastore.find_user(teacher_id=instructor_id)
-    course = Course.query.filter_by(course_code=course_id).first()
+    instructor = instructor_datastore.find_user(id=instructor_id)
+    course = Course.query.filter(Course.id == course_id).first()
     if instructor and course:
         instructor.courses.append(course)
         instructor_datastore.commit()
-        db.session.commit()
         return make_response(jsonify({'id': instructor.id,
                                       'first_name': instructor.first_name,
                                       'middle_name': instructor.middle_name,
@@ -345,18 +344,11 @@ def assign_instructor():
             instructor_id = request.form.get('instructor_id', None)
             course_id = request.form.get('course_id', None)
             semister = request.form.get('semister', None)
-            # department = request.form.get('department', None)
-            # batch = request.form.get('batch', None)
-            # section = request.form.get('section', None)
+            department = request.form.get('department', None)
+            batch = request.form.get('batch', None)
+            section = request.form.get('section', None)
             student_list = request.form.get('student_list', None)
-            print(f"student_list {student_list}")
-            print(f"course_id {course_id}")
-            print(f"instructor_id{instructor_id}")
-            student = student_datastore.find_user(id=student_list[0])
-            if student:
-                batch = student.batch_section.split(" ")[0]
-                section = student.batch_section.split(" ")[1]
-                department = student.department
+
             created_class = AssignedStudent.query.filter_by(semister=semister,
                                                             batch=batch,
                                                             department=department,
@@ -376,7 +368,7 @@ def assign_instructor():
                     created_class.courses.append(Course.query.filter_by(id=course_id).first())
                 if instructor_datastore.find_user(id=instructor_id):
                     created_class.instructors.append(instructor_datastore.find_user(id=instructor_id))
-                    # instructor_datastore.find_user(id=instructor_id).courses.append(Course.query.filter_by(id=course_id).first())
+                    instructor_datastore.find_user(id=instructor_id).courses.append(Course.query.filter_by(id=course_id).first())
             except Exception:
                 pass
             db.session.add(created_class)
@@ -389,7 +381,6 @@ def assign_instructor():
                 'batch': created_class.batch,
                 'section': created_class.section
                 }
-            print(created_class.students)
             response.update(
                 students=[{'id': student.id,
                            'first_name': student.first_name,
