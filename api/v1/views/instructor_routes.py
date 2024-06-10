@@ -386,6 +386,7 @@ def assign_instructor():
                 'batch': created_class.batch,
                 'section': created_class.section
                 }
+            print(created_class.students)
             response.update(
                 students=[{'id': student.id,
                            'first_name': student.first_name,
