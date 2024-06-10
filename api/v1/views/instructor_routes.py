@@ -304,6 +304,31 @@ def get_instructor_course():
 # automatic student attendance tracking for session
 
 
+@app_views.route('/instructor/attach/course', methods=['POST'], strict_slashes=False)
+@jwt_required()
+def attach_course():
+    admin, user_type = get_current_user()
+    if user_type != 'admin':
+        return make_response(jsonify({'error': 'URL doesnt exist'}), 404)
+    request.form = request.get_json()
+    instructor_id = request.form.get("instructor_id", None)
+    course_id = request.form.get("course_id", None)
+    instructor = instructor_datastore.find_user(id=instructor_id)
+    course = Course.query.filter(Course.id == course_id).first()
+    if instructor and course:
+        instructor.courses.append(course)
+        instructor_datastore.commit()
+        return make_response(jsonify({'id': instructor.id,
+                                      'first_name': instructor.first_name,
+                                      'middle_name': instructor.middle_name,
+                                      'last_name': instructor.last_name,
+                                      'email': instructor.email,
+                                      'courses': [{'name': i.course_name,
+                                                   'code': i.course_code,
+                                                   'credit': i.course_credit} for i in instructor.courses]}))
+    return make_response({})
+
+
 @app_views.route('/instructor/auth/create-class', methods=['POST'], strict_slashes=False)
 @jwt_required()
 def assign_instructor():
@@ -343,7 +368,7 @@ def assign_instructor():
                     created_class.courses.append(Course.query.filter_by(id=course_id).first())
                 if instructor_datastore.find_user(id=instructor_id):
                     created_class.instructors.append(instructor_datastore.find_user(id=instructor_id))
-                    instructor_datastore.find_user(id=instructor_id).courses.append(Course.query.filter_by(id=course_id).first())
+                    # instructor_datastore.find_user(id=instructor_id).courses.append(Course.query.filter_by(id=course_id).first())
             except Exception:
                 pass
             db.session.add(created_class)
