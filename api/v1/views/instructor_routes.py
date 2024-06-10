@@ -318,6 +318,7 @@ def attach_course():
     if instructor and course:
         instructor.courses.append(course)
         instructor_datastore.commit()
+        db.session.commit()
         return make_response(jsonify({'id': instructor.id,
                                       'first_name': instructor.first_name,
                                       'middle_name': instructor.middle_name,
@@ -344,11 +345,15 @@ def assign_instructor():
             instructor_id = request.form.get('instructor_id', None)
             course_id = request.form.get('course_id', None)
             semister = request.form.get('semister', None)
-            department = request.form.get('department', None)
-            batch = request.form.get('batch', None)
-            section = request.form.get('section', None)
+            # department = request.form.get('department', None)
+            # batch = request.form.get('batch', None)
+            # section = request.form.get('section', None)
             student_list = request.form.get('student_list', None)
-
+            student = student_datastore.find_user(id=student_list[0]['id'])
+            if student:
+                batch = student.batch_section.split(" ")[0]
+                section = student.batch_section.split(" ")[1]
+                department = student.department
             created_class = AssignedStudent.query.filter_by(semister=semister,
                                                             batch=batch,
                                                             department=department,
