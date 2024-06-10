@@ -349,6 +349,9 @@ def assign_instructor():
             # batch = request.form.get('batch', None)
             # section = request.form.get('section', None)
             student_list = request.form.get('student_list', None)
+            print(f"student_list {student_list}")
+            print(f"course_id {course_id}")
+            print(f"instructor_id{instructor_id}")
             student = student_datastore.find_user(id=student_list[0])
             if student:
                 batch = student.batch_section.split(" ")[0]
