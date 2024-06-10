@@ -313,7 +313,7 @@ def attach_course():
     request.form = request.get_json()
     instructor_id = request.form.get("instructor_id", None)
     course_id = request.form.get("course_id", None)
-    instructor = instructor_datastore.find_user(id=instructor_id)
+    instructor = instructor_datastore.find_user(teacher_id=instructor_id)
     course = Course.query.filter_by(course_code=course_id).first()
     if instructor and course:
         instructor.courses.append(course)
