@@ -416,7 +416,7 @@ def assign_instructor():
                           'course_department': course.course_department,
                           'course_code': course.course_code} for course in created_class.courses])
             return make_response(jsonify(response), 200)
-        except Exception as e:
+        except ValueError as e:
             return make_response(jsonify({'error': str(e)}), 400)
     return make_response(jsonify({'error': 'URL doesnt exist'}), 404)
 
