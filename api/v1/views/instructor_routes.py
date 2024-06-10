@@ -314,7 +314,7 @@ def attach_course():
     instructor_id = request.form.get("instructor_id", None)
     course_id = request.form.get("course_id", None)
     instructor = instructor_datastore.find_user(id=instructor_id)
-    course = Course.query.filter(Course.id == course_id).first()
+    course = Course.query.filter_by(id=course_id).first()
     if instructor and course:
         instructor.courses.append(course)
         instructor_datastore.commit()
