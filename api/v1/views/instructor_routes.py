@@ -370,10 +370,11 @@ def assign_instructor():
                 if instructor_datastore.find_user(id=instructor_id):
                     created_class.instructors.append(instructor_datastore.find_user(teacher_id=instructor_id))
                     instructor_datastore.find_user(teacher_id=instructor_id).courses.append(Course.query.filter_by(id=course_id).first())
+                    instructor_datastore.commit()
+                    db.session.add(created_class)
+                    db.session.commit()
             except Exception:
                 pass
-            db.session.add(created_class)
-            db.session.commit()
             response['class'] = {
                 'id': created_class.id,
                 'year': created_class.year,
