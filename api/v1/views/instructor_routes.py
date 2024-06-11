@@ -348,6 +348,7 @@ def assign_instructor():
             batch = request.form.get('batch', None)
             section = request.form.get('section', None)
             student_list = request.form.get('student_list', None)
+            print(instructor_id)
 
             created_class = AssignedStudent.query.filter_by(semister=semister,
                                                             batch=batch,
