@@ -367,7 +367,7 @@ def assign_instructor():
                     created_class.students.append(student_datastore.find_user(id=student))
                 if Course.query.filter_by(id=course_id).first():
                     created_class.courses.append(Course.query.filter_by(id=course_id).first())
-                if instructor_datastore.find_user(id=instructor_id):
+                if instructor_datastore.find_user(teacher_id=instructor_id):
                     created_class.instructors.append(instructor_datastore.find_user(teacher_id=instructor_id))
                     instructor_datastore.find_user(teacher_id=instructor_id).courses.append(Course.query.filter_by(id=course_id).first())
                     instructor_datastore.commit()
