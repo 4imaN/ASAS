@@ -368,8 +368,8 @@ def assign_instructor():
                 if Course.query.filter_by(id=course_id).first():
                     created_class.courses.append(Course.query.filter_by(id=course_id).first())
                 if instructor_datastore.find_user(id=instructor_id):
-                    created_class.instructors.append(instructor_datastore.find_user(id=instructor_id))
-                    instructor_datastore.find_user(id=instructor_id).courses.append(Course.query.filter_by(id=course_id).first())
+                    created_class.instructors.append(instructor_datastore.find_user(teacher_id=instructor_id))
+                    instructor_datastore.find_user(teacher_id=instructor_id).courses.append(Course.query.filter_by(id=course_id).first())
             except Exception:
                 pass
             db.session.add(created_class)
