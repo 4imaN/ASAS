@@ -600,6 +600,7 @@ def get_classes():
                           'course_department': course.course_department,
                           'course_code': course.course_code} for course in classes.courses])
             responses.append(response)
+            response = {}
         return make_response(jsonify(responses), 200)
     except Exception as e:
         return make_response(jsonify({'error': str(e)}), 400)
