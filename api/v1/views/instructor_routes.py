@@ -556,7 +556,11 @@ def get_classes():
             return make_response(jsonify({'error': 'class not found'}), 404)
         created_class = created_class.all()
         # print(created_class)
+        already_added = []
         for classes in created_class:
+            if classes.id in already_added:
+                continue
+            already_added.append(classes.id)
             class_course_id = [i.id for i in classes.courses]
             response['class'] = {
                         'id': classes.id,
