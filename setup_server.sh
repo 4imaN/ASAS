@@ -12,15 +12,10 @@ server {
     listen 80;
 
     location / {
-        proxy_pass http://127.0.0.1:5000;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_pass http://127.0.0.1:5000/api/v1;
     }
 }
 EOL
-
 # Test Nginx configuration and reload if successful
 sudo nginx -t && sudo systemctl reload nginx
 
